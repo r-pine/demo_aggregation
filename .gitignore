@@ -2,5 +2,6 @@
 .vscode
 .envs/.env_web
 .envs/.env
+.envs/.env_letsencrypt
 .docker-volumes
 venv
