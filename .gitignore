@@ -1,0 +1,6 @@
+.idea
+.vscode
+.envs/.env_web
+.envs/.env
+.docker-volumes
+venv

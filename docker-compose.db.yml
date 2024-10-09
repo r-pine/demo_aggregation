@@ -1,0 +1,14 @@
+services:
+  redis:
+    container_name: demo-redis
+    image: redis:7
+    env_file:
+      - ./.envs/.env
+    ports:
+      - "6378:6379"
+    restart: always
+
+#networks:
+#  default:
+#    external: true
+#    name: proxy-api-gateway_shared-web

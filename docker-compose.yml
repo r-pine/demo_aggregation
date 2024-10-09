@@ -1,0 +1,33 @@
+version: "3.8"
+
+services:
+  nginx-app-demo-aggregation:
+    container_name: nginx-app-demo-aggregation
+    build:
+      dockerfile: ./nginx-app/Dockerfile
+    restart: always
+    tty: true
+    ports:
+      - "8052:80"
+#    env_file:
+#      - ./.envs/.env_web
+    depends_on:
+      - demo-aggregation
+#    volumes:
+#      - ./openapi:/usr/share/nginx/html/
+
+  demo-aggregation:
+    container_name: demo-aggregation
+    command: ["go", "run", "./app/cmd/app/main.go"]
+    env_file:
+      - ./.envs/.env
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app:z
+    restart: always
+
+#networks:
+#  default:
+#    external: true
+#    name: proxy-api-gateway_shared-web
