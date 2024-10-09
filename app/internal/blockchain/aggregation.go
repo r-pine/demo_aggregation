@@ -53,7 +53,7 @@ func (a *Aggregation) Run() {
 	for {
 		aggrs := map[string]entity.Platform{}
 		for k, v := range contracts {
-			aggr, err := a.GetAccountData(k, v)
+			aggr, err := a.getAccountData(k, v)
 			if err != nil {
 				a.log.Errorln(err)
 				continue
@@ -65,7 +65,6 @@ func (a *Aggregation) Run() {
 			a.log.Errorln(err)
 			continue
 		}
-		fmt.Println(aggrsStr)
 		if err := a.service.Set("states", aggrsStr); err != nil {
 			a.log.Errorln(err)
 			continue
@@ -82,7 +81,7 @@ func (a *Aggregation) aggregationsToJsonStr(aggr *entity.Aggregation) (string, e
 	return string(data), nil
 }
 
-func (a *Aggregation) GetAccountData(
+func (a *Aggregation) getAccountData(
 	contractName, contractAddress string,
 ) (*entity.Platform, error) {
 
@@ -150,7 +149,6 @@ func (a *Aggregation) GetAccountData(
 		Address: entity.Address{
 			Bounce:   res.State.Address.Bounce(true).String(),
 			UnBounce: res.State.Address.Bounce(false).String(),
-			Raw:      res.State.Address.String(),
 		},
 		Fee:      fee,
 		Reserve0: reserve0,

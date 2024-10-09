@@ -17,5 +17,4 @@ type Platform struct {
 type Address struct {
 	Bounce   string `json:"bounce"`
 	UnBounce string `json:"unbounce"`
-	Raw      string `json:"raw"`
 }
