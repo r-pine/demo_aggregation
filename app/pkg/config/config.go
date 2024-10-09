@@ -15,6 +15,7 @@ type Config struct {
 		LiteserverPinePort int    `env:"LITESERVER_PINE_PORT"`
 		LiteserverPineType string `env:"LITESERVER_PINE_TYPE"`
 		LiteserverPineKey  string `env:"LITESERVER_PINE_KEY"`
+		Delay              int    `env:"DELAY"`
 	}
 	Redis struct {
 		Host     string `env:"REDIS_HOST"`

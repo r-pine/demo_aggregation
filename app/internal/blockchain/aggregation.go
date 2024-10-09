@@ -1,12 +1,16 @@
 package blockchain
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"strconv"
+	"time"
 
 	"context"
 
+	"github.com/r-pine/demo_aggregation/app/internal/entity"
+	sc "github.com/r-pine/demo_aggregation/app/internal/service"
 	"github.com/r-pine/demo_aggregation/app/pkg/config"
 	"github.com/r-pine/demo_aggregation/app/pkg/logging"
 	"github.com/xssnick/tonutils-go/address"
@@ -16,20 +20,23 @@ import (
 )
 
 type Aggregation struct {
-	ctx context.Context
-	cfg config.Config
-	log logging.Logger
+	ctx     context.Context
+	cfg     config.Config
+	log     logging.Logger
+	service *sc.Service
 }
 
 func NewAggregation(
 	ctx context.Context,
 	cfg config.Config,
 	log logging.Logger,
+	service *sc.Service,
 ) *Aggregation {
 	return &Aggregation{
-		ctx: ctx,
-		cfg: cfg,
-		log: log,
+		ctx:     ctx,
+		cfg:     cfg,
+		log:     log,
+		service: service,
 	}
 }
 
@@ -37,12 +44,51 @@ const (
 	liteserverUrl = "https://ton.org/global.config.json"
 )
 
-func (a *Aggregation) RunAggregation(contractName, contractAddress string) {
+func (a *Aggregation) Run() {
+	contracts := map[string]string{
+		"stonfi": "EQCcD96ywHvlXBjuf4ihiGyH66QChHesNyoJSQ6WKKqob3Lh",
+		// "private": "EQCcD96ywHvlXBjuf4ihiGyH66QChHesNyoJSQ6WKKqob3Lh",
+		"dedust": "EQBPo45inIbFXiUt8I8xrakPRB1aXZ-wzNOJfIhfQgd2rJ-z",
+	}
+	for {
+		aggrs := map[string]entity.Platform{}
+		for k, v := range contracts {
+			aggr, err := a.GetAccountData(k, v)
+			if err != nil {
+				a.log.Errorln(err)
+				continue
+			}
+			aggrs[k] = *aggr
+		}
+		aggrsStr, err := a.aggregationsToJsonStr(&entity.Aggregation{Dex: aggrs})
+		if err != nil {
+			a.log.Errorln(err)
+			continue
+		}
+		fmt.Println(aggrsStr)
+		if err := a.service.Set("states", aggrsStr); err != nil {
+			a.log.Errorln(err)
+			continue
+		}
+		time.Sleep(time.Duration(a.cfg.AppConfig.Delay) * time.Second)
+	}
+}
+
+func (a *Aggregation) aggregationsToJsonStr(aggr *entity.Aggregation) (string, error) {
+	data, err := json.Marshal(aggr)
+	if err != nil {
+		return "", err
+	}
+	return string(data), nil
+}
+
+func (a *Aggregation) GetAccountData(
+	contractName, contractAddress string,
+) (*entity.Platform, error) {
 
 	cfg, err := liteclient.GetConfigFromUrl(a.ctx, liteserverUrl)
 	if err != nil {
-		a.log.Errorln(err)
-		return
+		return nil, err
 	}
 
 	cfg.Liteservers = append(cfg.Liteservers, liteclient.LiteserverConfig{
@@ -58,8 +104,7 @@ func (a *Aggregation) RunAggregation(contractName, contractAddress string) {
 
 	err = client.AddConnectionsFromConfig(a.ctx, cfg)
 	if err != nil {
-		a.log.Errorln("connection err: ", err.Error())
-		return
+		return nil, err
 	}
 	api := ton.NewAPIClient(client, ton.ProofCheckPolicyFast).WithRetry()
 
@@ -67,46 +112,57 @@ func (a *Aggregation) RunAggregation(contractName, contractAddress string) {
 
 	b, err := api.CurrentMasterchainInfo(ctx)
 	if err != nil {
-		a.log.Errorln("get block err:", err.Error())
-		return
+		return nil, err
 	}
 
 	addr := address.MustParseAddr(contractAddress)
 
 	res, err := api.WaitForBlock(b.SeqNo).GetAccount(ctx, b, addr)
 	if err != nil {
-		a.log.Errorln("get account err:", err.Error())
-		return
+		return nil, err
 	}
+
+	var (
+		fee      int64
+		reserve0 int64
+		reserve1 int64
+	)
 
 	switch contractName {
 	case "stonfi":
-		fee, reserve0, reserve1 := a.getFeeAndReservesStonFi(res)
-		fmt.Println(fee, reserve0, reserve1)
+		fee, reserve0, reserve1 = a.getFeeAndReservesStonFi(res)
 	case "dedust":
-		reserve0, reserve1, err := a.getReservesDedust(api, b, contractAddress)
+		reserve0, reserve1, err = a.getReservesDedust(
+			api, b, contractAddress,
+		)
 		if err != nil {
-			a.log.Errorln("getReservesDedust err:", err.Error())
-			return
+			return nil, err
 		}
-		fees, err := a.getFeesDedust(api, b, contractAddress)
-		if err != nil {
-			a.log.Errorln("getFeesDedust err:", err.Error())
-			return
-		}
-		fmt.Println(fees, reserve0, reserve1)
 
+		fee, err = a.getFeesDedust(api, b, contractAddress)
+		if err != nil {
+			return nil, err
+		}
 	case "private":
 	}
-	fmt.Printf("Is active: %v\n", res.IsActive)
-	if res.IsActive {
-		fmt.Printf("Status: %s\n", res.State.Status)
 
-		fmt.Printf("Balance: %s TON\n", res.State.Balance.String())
+	pl := entity.Platform{
+		Address: entity.Address{
+			Bounce:   res.State.Address.Bounce(true).String(),
+			UnBounce: res.State.Address.Bounce(false).String(),
+			Raw:      res.State.Address.String(),
+		},
+		Fee:      fee,
+		Reserve0: reserve0,
+		Reserve1: reserve1,
+		IsActive: res.IsActive,
+		Status:   string(res.State.Status),
+		Balance:  res.State.Balance.String(),
 	}
+	return &pl, nil
 }
 
-func (a *Aggregation) getFeeAndReservesStonFi(res *tlb.Account) (uint64, int64, int64) {
+func (a *Aggregation) getFeeAndReservesStonFi(res *tlb.Account) (int64, int64, int64) {
 	// refFee := slice.MustLoadUInt(8)
 	// token0 := slice.MustLoadAddr()
 	// token1 := slice.MustLoadAddr()
@@ -131,7 +187,7 @@ func (a *Aggregation) getFeeAndReservesStonFi(res *tlb.Account) (uint64, int64, 
 		reserve0 := ref.MustLoadBigCoins().Int64()
 		reserve1 := ref.MustLoadBigCoins().Int64()
 		fee := lpFee + protocolFee
-		return fee, reserve0, reserve1
+		return int64(fee), reserve0, reserve1
 	}
 	return 0, 0, 0
 }

@@ -1,24 +1,26 @@
 package controller
 
 import (
+	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/r-pine/demo_aggregation/app/internal/entity"
 )
 
 func (c *Controller) Aggregation(ctx *gin.Context) {
-	var obj struct {
-		Msg string `json:"msg"`
+	data, err := c.sc.Get("states")
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		return
 	}
-	obj.Msg = "Aggregation"
-	contracts := map[string]string{
-		"stonfi": "EQCcD96ywHvlXBjuf4ihiGyH66QChHesNyoJSQ6WKKqob3Lh",
-		// "private": "EQCcD96ywHvlXBjuf4ihiGyH66QChHesNyoJSQ6WKKqob3Lh",
-		"dedust": "EQBPo45inIbFXiUt8I8xrakPRB1aXZ-wzNOJfIhfQgd2rJ-z",
-	}
-	for k, v := range contracts {
-		go c.aggregation.RunAggregation(k, v)
+	fmt.Println(data)
+	var res *entity.Aggregation
+	if err := json.Unmarshal([]byte(data), &res); err != nil {
+		ctx.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		return
 	}
 
-	ctx.JSON(http.StatusOK, &obj)
+	ctx.JSON(http.StatusOK, res)
 }

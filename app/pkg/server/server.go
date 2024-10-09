@@ -2,10 +2,11 @@ package server
 
 import (
 	"errors"
-	"github.com/r-pine/demo_aggregation/app/pkg/logging"
 	"net/http"
 	"os"
 	"os/signal"
+
+	"github.com/r-pine/demo_aggregation/app/pkg/logging"
 )
 
 func RunServer(
@@ -26,7 +27,7 @@ func RunServer(
 			log.Fatal("Server Close:", err)
 		}
 	}()
-
+	log.Infoln("Start server", httpAddr)
 	if err := server.ListenAndServe(); err != nil {
 		if errors.Is(err, http.ErrServerClosed) {
 			log.Infoln("Server closed under request")

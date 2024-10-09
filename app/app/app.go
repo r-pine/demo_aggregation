@@ -32,15 +32,24 @@ func RunApplication() {
 		log.Fatalf("redis connect to redis failed: %v", err)
 		return
 	}
+	log.Infoln("Connect redis successfully!")
 
 	storage := st.NewStorage(ctx, rc)
+	log.Infoln("Connect storage successfully!")
+
 	service := sc.NewService(ctx, storage)
-	aggregation := blockchain.NewAggregation(ctx, *cfg, log)
+	log.Infoln("Connect service successfully!")
+
+	aggregation := blockchain.NewAggregation(ctx, *cfg, log, service)
+	log.Infoln("Connect aggregation successfully!")
 
 	gin.SetMode(cfg.AppConfig.GinMode)
 	ginRouter := gin.New()
 	httpController := controller.NewController(log, *service, *cfg, aggregation)
 	handlers := httpController.InitRoutes(ginRouter)
+	log.Infoln("Connect handlers successfully!")
+
+	go aggregation.Run()
 
 	server.RunServer(log, handlers, cfg.AppConfig.HttpAddr)
 }
