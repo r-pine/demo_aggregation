@@ -27,6 +27,7 @@ services:
     image: nginxproxy/acme-companion:latest
     env_file:
       - .envs/.env_letsencrypt
+    restart: always
     logging:
       options:
         max-size: "100m"

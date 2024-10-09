@@ -2,7 +2,9 @@ package app
 
 import (
 	"context"
+
 	"github.com/gin-gonic/gin"
+	"github.com/r-pine/demo_aggregation/app/internal/blockchain"
 	"github.com/r-pine/demo_aggregation/app/internal/controller"
 	"github.com/r-pine/demo_aggregation/app/internal/db/redis"
 	sc "github.com/r-pine/demo_aggregation/app/internal/service"
@@ -33,10 +35,11 @@ func RunApplication() {
 
 	storage := st.NewStorage(ctx, rc)
 	service := sc.NewService(ctx, storage)
+	aggregation := blockchain.NewAggregation(ctx, *cfg, log)
 
 	gin.SetMode(cfg.AppConfig.GinMode)
 	ginRouter := gin.New()
-	httpController := controller.NewController(log, *service, *cfg)
+	httpController := controller.NewController(log, *service, *cfg, aggregation)
 	handlers := httpController.InitRoutes(ginRouter)
 
 	server.RunServer(log, handlers, cfg.AppConfig.HttpAddr)

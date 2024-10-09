@@ -6,10 +6,11 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func (c *Controller) Healthcheck(ctx *gin.Context) {
+func (c *Controller) Aggregation(ctx *gin.Context) {
 	var obj struct {
 		Msg string `json:"msg"`
 	}
-	obj.Msg = "Hello Rpine Demo Aggregation"
+	obj.Msg = "Aggregation"
+	c.aggregation.RunAggregation()
 	ctx.JSON(http.StatusOK, &obj)
 }
