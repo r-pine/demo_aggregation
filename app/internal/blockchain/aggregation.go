@@ -46,9 +46,9 @@ const (
 
 func (a *Aggregation) Run() {
 	contracts := map[string]string{
-		"stonfi": "EQCcD96ywHvlXBjuf4ihiGyH66QChHesNyoJSQ6WKKqob3Lh",
-		// "private": "EQCcD96ywHvlXBjuf4ihiGyH66QChHesNyoJSQ6WKKqob3Lh",
-		"dedust": "EQBPo45inIbFXiUt8I8xrakPRB1aXZ-wzNOJfIhfQgd2rJ-z",
+		"stonfi":  "EQCcD96ywHvlXBjuf4ihiGyH66QChHesNyoJSQ6WKKqob3Lh",
+		"private": "EQCcD96ywHvlXBjuf4ihiGyH66QChHesNyoJSQ6WKKqob3Lh",
+		"dedust":  "EQBPo45inIbFXiUt8I8xrakPRB1aXZ-wzNOJfIhfQgd2rJ-z",
 	}
 	for {
 		aggrs := map[string]entity.Platform{}
@@ -71,14 +71,6 @@ func (a *Aggregation) Run() {
 		}
 		time.Sleep(time.Duration(a.cfg.AppConfig.Delay) * time.Second)
 	}
-}
-
-func (a *Aggregation) aggregationsToJsonStr(aggr *entity.Aggregation) (string, error) {
-	data, err := json.Marshal(aggr)
-	if err != nil {
-		return "", err
-	}
-	return string(data), nil
 }
 
 func (a *Aggregation) getAccountData(
@@ -143,6 +135,9 @@ func (a *Aggregation) getAccountData(
 			return nil, err
 		}
 	case "private":
+		// TODO:
+		// fee, reserve0, reserve1 = a.getFeeAndReservesPrivate(res)
+		fee, reserve0, reserve1 = a.getFeeAndReservesStonFi(res)
 	}
 
 	pl := entity.Platform{
@@ -160,7 +155,50 @@ func (a *Aggregation) getAccountData(
 	return &pl, nil
 }
 
+// storage::is_locked = ds~load_int(1);
+// storage::expires_at = ds~load_uint(32);
+// storage::admin_address = ds~load_msg_addr();
+// storage::lp_fee = ds~load_uint(8);
+// storage::protocol_fee = ds~load_uint(8);
+// storage::ref_fee = ds~load_uint(8);
+// storage::token0_address = ds~load_msg_addr();
+// storage::token1_address = ds~load_msg_addr();
+// storage::total_supply_lp = ds~load_coins();
+
+// cell dc_0 = ds~load_ref(); slice ds_0 = dc_0.begin_parse();
+// storage::collected_token0_protocol_fee = ds_0~load_coins();
+// storage::collected_token1_protocol_fee = ds_0~load_coins();
+// storage::protocol_fee_address = ds_0~load_msg_addr();
+// storage::reserve0 = ds_0~load_coins();
+// storage::reserve1 = ds_0~load_coins();
+func (a *Aggregation) getFeeAndReservesPrivate(res *tlb.Account) (int64, int64, int64) {
+	if res.Data != nil {
+		slice := res.Data.BeginParse()
+		_ = slice.MustLoadInt(1)
+		_ = slice.MustLoadUInt(32)
+		_ = slice.MustLoadAddr()
+		lpFee := slice.MustLoadUInt(8)
+		protocolFee := slice.MustLoadUInt(8)
+		_ = slice.MustLoadUInt(8)
+		_ = slice.MustLoadAddr()
+		_ = slice.MustLoadAddr()
+		_ = slice.MustLoadBigCoins()
+		ref := slice.MustLoadRef()
+		_ = ref.MustLoadBigCoins()
+		_ = ref.MustLoadBigCoins()
+		_ = ref.MustLoadAddr()
+		reserve0 := ref.MustLoadBigCoins().Int64()
+		reserve1 := ref.MustLoadBigCoins().Int64()
+		fee := lpFee + protocolFee
+		return int64(fee), reserve0, reserve1
+	}
+	return 0, 0, 0
+}
+
 func (a *Aggregation) getFeeAndReservesStonFi(res *tlb.Account) (int64, int64, int64) {
+	// adminAddr := slice.MustLoadAddr()
+	// lpFee := slice.MustLoadUInt(8)
+	// protocolFee := slice.MustLoadUInt(8)
 	// refFee := slice.MustLoadUInt(8)
 	// token0 := slice.MustLoadAddr()
 	// token1 := slice.MustLoadAddr()
@@ -243,4 +281,12 @@ func (a *Aggregation) getReservesDedust(
 		}
 	}
 	return reserve0, reserve1, nil
+}
+
+func (a *Aggregation) aggregationsToJsonStr(aggr *entity.Aggregation) (string, error) {
+	data, err := json.Marshal(aggr)
+	if err != nil {
+		return "", err
+	}
+	return string(data), nil
 }
