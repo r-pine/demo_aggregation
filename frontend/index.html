@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>oPine to aPine Exchange</title>
+    <style>
+        /* Basic styles */
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #121212;
+            color: #e0e0e0;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            min-height: 100vh;
+            padding: 0 20px;
+        }
+
+        header {
+            background-color: #1a1a1a;
+            width: 100%;
+            padding: 20px;
+            text-align: center;
+            color: #ffffff;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        main {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-grow: 1;
+            width: 100%;
+        }
+
+        .exchange-box {
+            background-color: #2a2a2a;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            transition: transform 0.3s ease-in-out, background-color 0.3s ease, color 0.3s ease;
+            width: 100%;
+            max-width: 400px;
+            margin: 20px;
+            color: #ffffff;
+        }
+
+        .balance-info {
+            margin-bottom: 20px;
+            font-size: 18px;
+            color: #b3b3b3;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            font-size: 16px;
+            margin-bottom: 8px;
+            color: #cccccc;
+        }
+
+        div[type="number"] {
+            
+            padding: 12px;
+            margin-top: 10px;
+            border: 1px solid #444;
+            border-radius: 4px;
+            background-color: #3a3a3a;
+            color: #e0e0e0;
+            font-size: 16px;
+            -moz-appearance: textfield;
+            user-select: none;
+            /* Default value removed to make it empty */
+            text-align: left;
+        }
+
+        div[type="number"]::-webkit-outer-spin-button,
+        div[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+
+        div[type="number"]:focus {
+            outline: none;
+            border: 1px solid #444;
+        }
+
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+
+        #exchange-button {
+            width: calc(100%);
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-bottom: 12px;
+        }
+
+        #connectToWallet button  {
+            
+            padding: 22px 136px;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            white-space: nowrap;
+        }
+
+        #exchange-button {
+            background-color: #0cc17a;
+            color: white;
+        }
+
+        #exchange-button:hover {
+            background-color: #009c63;
+        }
+
+        .result {
+            margin-top: 20px;
+            font-size: 18px;
+            color: #b3b3b3;
+        }
+
+        footer {
+            background-color: #1a1a1a;
+            width: 100%;
+            padding: 20px 0;
+            text-align: center;
+            color: white;
+            box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        footer p {
+            margin: 0;
+            font-size: 14px;
+        }
+
+        footer a {
+            color: #0088cc;
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        footer a:hover {
+            color: #005f8c;
+        }
+
+        @media (max-width: 600px) {
+
+            .exchange-box {
+                padding: 20px;
+            }
+        }
+
+        @media (max-width: 500px) {
+            #connectToWallet button {
+                padding: 22px 124px;
+            }
+        }
+
+        @media (max-width: 400px) {
+            #connectToWallet button {
+                padding: 22px 100px;
+            }
+        }
+
+        @media (max-width: 350px) {
+            #connectToWallet button {
+                padding: 22px 80px;
+            }
+        }
+
+        @media (max-width: 300px) {
+            #connectToWallet button {
+                padding: 22px 60px;
+            }
+        }
+
+        @media (max-width: 200px) {
+            #connectToWallet button {
+                padding: 22px 10px;
+            }
+        }
+        
+        /* Modal styles */
+        #transactionModal {
+            display: none; 
+            position: fixed; 
+            z-index: 1; 
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.5); 
+        }
+
+        #modal-content {
+            background-color: #2a2a2a;
+            margin: 15% auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 400px;
+            border-radius: 8px;
+            text-align: center;
+            color: #e0e0e0;
+        }
+
+        #modal-content a {
+            color: #0cc17a;
+            text-decoration: none;
+        }
+
+        #modal-content a:hover {
+            color: #009c63;
+        }
+
+        #closeModal {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        #closeModal:hover,
+        #closeModal:focus {
+            color: #000;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        /* Новые стили для поля ввода TON и кнопки "Max" */
+        .balance-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .balance {
+            font-size: 16px;
+            color: #b3b3b3;
+        }
+
+        .max-button {
+            background-color: #0cc17a;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 6px 12px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .max-button:hover {
+            background-color: #009c63;
+        }
+
+        /* Стили для кнопки переворота */
+        .swap-button {
+            color: #0088cc;
+            background-color: transparent;
+            border: none;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+
+        .swap-button svg {
+            width: 34px;
+            height: 34px;
+        }
+
+        /* Стили для полей ввода */
+        input[type="number"] {
+            width: 100%;
+            padding: 12px;
+            margin-top: 10px;
+            border: 1px solid #444;
+            border-radius: 4px;
+            background-color: #3a3a3a;
+            color: #e0e0e0;
+            font-size: 16px;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border: 1px solid #0cc17a;
+        }
+    </style>
+</head>
+<body class="dark-theme">
+    <div class="container">
+        <header>
+            <h1>Обмен TON на aPine</h1>
+        </header>
+        <main>
+            <div class="exchange-box">
+                <!-- Отображение баланса TON и кнопка "Max" -->
+                <div class="balance-container">
+                    <div class="balance">Баланс TON: <span id="ton-balance">0</span></div>
+                    <button class="max-button" id="max-button">Max</button>
+                </div>
+                <!-- Поле ввода суммы TON -->
+                <div class="input-group">
+                    <label for="ton-amount">Сумма TON:</label>
+                    <input type="number" id="ton-amount" placeholder="Введите сумму TON">
+                </div>
+                <!-- Кнопка переворота -->
+                <button class="swap-button" id="swap-button">
+                    <!-- <img src="swap-icon.png" alt="Swap"> -->
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3.86321 8.72726C3.51174 9.07873 3.51174 9.64858 3.86321 10C4.21468 10.3515 4.78453 10.3515 5.13601 10L6.59961 8.53644L6.59961 16.8637C6.59961 17.3607 7.00255 17.7637 7.49961 17.7637C7.99667 17.7637 8.39961 17.3607 8.39961 16.8637V8.53645L9.86321 10C10.2147 10.3515 10.7845 10.3515 11.136 10C11.4875 9.64858 11.4875 9.07873 11.136 8.72726L8.13601 5.72726C7.96722 5.55847 7.73831 5.46365 7.49961 5.46365C7.26092 5.46365 7.032 5.55847 6.86321 5.72726L3.86321 8.72726Z" fill="currentColor"></path><path d="M20.1368 15C20.4883 14.6485 20.4883 14.0787 20.1368 13.7272C19.7853 13.3757 19.2155 13.3757 18.864 13.7272L17.4004 15.1908L17.4004 6.8636C17.4004 6.36655 16.9974 5.9636 16.5004 5.9636C16.0033 5.9636 15.6004 6.36655 15.6004 6.8636L15.6004 15.1908L14.1368 13.7272C13.7853 13.3757 13.2155 13.3757 12.864 13.7272C12.5125 14.0787 12.5125 14.6485 12.864 15L15.864 18C16.2155 18.3515 16.7853 18.3515 17.1368 18L20.1368 15Z" fill="currentColor"></path></svg>
+
+                </button>
+                <!-- Поле ввода суммы aPine -->
+                <div class="input-group">
+                    <label for="apine-amount">Сумма aPine:</label>
+                    <input type="number" id="apine-amount" placeholder="Введите сумму aPine">
+                </div>
+                <div class="button-container">
+                    <button id="exchange-button">Обменять</button>
+                    <div id="connectToWallet" class="connect-button"></div>
+                </div>
+            </div>
+        </main>
+        <footer>
+            <p>Powered by <a href="https://t.me/rpine_xyz_news">RPine</a></p>
+        </footer>
+    </div>
+
+        <!-- The Modal -->
+        <div id="transactionModal">
+            <div id="modal-content">
+                <span id="closeModal">&times;</span>
+                <p>Transaction sent successfully! Check the details <a id="transactionLink" href="#" target="_blank">here</a>.</p>
+            </div>
+        </div>
+
+    <!-- Подключаем tonweb и tonconnect-ui -->
+    <script src="https://cdn.jsdelivr.net/npm/tonweb/dist/tonweb.js"></script>
+    <script src="https://demo.rpine.xyz/tonconnect-ui.min.js"></script>
+
+    <script>
+        // Инициализация TonConnect UI
+        const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
+            manifestUrl: 'https://api.rpine.xyz/tonconnect-manifest.json',
+            buttonRootId: 'connectToWallet',
+        });
+
+        let isTonToApine = true; // Флаг направления обмена
+        //console.log(tonConnectUI.account.amount)
+        
+        // Обновление баланса TON
+        async function updateTonBalance() {
+            if (tonConnectUI.connected) {
+                const walletAddress = tonConnectUI.account.address;
+                try {
+                    // Получаем баланс TON
+                    const response = await fetch(`https://toncenter.com/api/v2/getAddressBalance?address=${walletAddress}`);
+                    const data = await response.json();
+                    const balance = parseInt(data.result, 10) / 1e9; // Преобразуем баланс из нанотонов в тонны
+                    document.getElementById('ton-balance').innerText = balance.toFixed(2);
+
+                    // Обновляем поле opine-amount (теперь aPine)
+                    // Дополнительно можно получить баланс aPine, если нужно
+
+                } catch (error) {
+                    console.error('Ошибка при получении баланса TON:', error);
+                    document.getElementById('ton-balance').innerText = 'Ошибка';
+                }
+            }
+        }
+
+        // Установка максимального значения TON в поле ввода
+        document.getElementById('max-button').addEventListener('click', () => {
+            const balance = document.getElementById('ton-balance').innerText;
+            document.getElementById('ton-amount').value = balance;
+            // Триггерим событие ввода для обновления второго поля
+            handleAmountInput();
+        });
+
+        // Обработчик переключения направления обмена
+        document.getElementById('swap-button').addEventListener('click', () => {
+            isTonToApine = !isTonToApine;
+            updateLabels();
+            // Очищаем поля ввода при смене направления
+            document.getElementById('ton-amount').value = '';
+            document.getElementById('apine-amount').value = '';
+        });
+
+        // Обновление подписей полей в соответствии с направлением обмена
+        function updateLabels() {
+            const tonLabel = document.querySelector('label[for="ton-amount"]');
+            const apineLabel = document.querySelector('label[for="apine-amount"]');
+            const tonInp = document.getElementById('ton-amount')
+            const apineAmount = document.getElementById('apine-amount')
+            
+
+            if (isTonToApine) {
+                tonInp.placeholder = 'Введите сумму TON'
+                apineAmount.placeholder = 'Введите сумму aPine'
+                tonLabel.innerText = 'Сумма TON:';
+                apineLabel.innerText = 'Сумма aPine:';
+            } else {
+                tonInp.placeholder = 'Введите сумму aPine'
+                apineAmount.placeholder = 'Введите сумму TON'
+                tonLabel.innerText = 'Сумма aPine:';
+                apineLabel.innerText = 'Сумма TON:';
+            }
+        }
+
+        // Обработчик ввода суммы для обновления другого поля
+        function handleAmountInput() {
+            const tonAmountInput = document.getElementById('ton-amount');
+            const apineAmountInput = document.getElementById('apine-amount');
+
+            // Отправляем запрос на сервер для получения курса обмена
+            const amount = parseFloat(tonAmountInput.value);
+
+            if (!isNaN(amount)) {
+                fetchPayloadForAmount(amount);
+            }
+        }
+
+        // Функция для получения payload с сервера на основе введенной суммы
+        async function fetchPayloadForAmount(amount) {
+            if (!tonConnectUI.connected) {
+                alert('Пожалуйста, подключите кошелек.');
+                return;
+            }
+
+            const walletAddress = tonConnectUI.account.address;
+
+            try {
+                const response = await fetch('https://air-swap.rpine.xyz/api/payload', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        address: walletAddress,
+                        amount: amount,
+                        direction: isTonToApine ? 'TON_TO_APINE' : 'APINE_TO_TON'
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Ошибка сети');
+                }
+
+                const payloadData = await response.json();
+
+                // Обновляем данные транзакции
+                window.transactionData = payloadData.message;
+                window.walletAddr = walletAddress;
+
+
+                // Обновляем второе поле с рассчитанной суммой
+                const otherAmount = payloadData.calculatedAmount;
+                if (isTonToApine) {
+                    document.getElementById('apine-amount').value = otherAmount;
+                } else {
+                    document.getElementById('apine-amount').value = otherAmount;
+                }
+
+            } catch (error) {
+                console.error('Ошибка при получении payload:', error);
+            }
+        }
+
+        // Обработчик кнопки "Обменять"
+        async function sendTransaction() {
+            const payloadData = window.transactionData;
+
+            if (!payloadData) {
+                alert('Нет данных для транзакции. Пожалуйста, введите сумму.');
+                return;
+            }
+
+            const transaction = {
+                validUntil: Math.floor(Date.now() / 1000) + 60,
+                messages: [
+                    {
+                        address: payloadData.address,
+                        amount: payloadData.amount,
+                        payload: payloadData.payload 
+                    }
+                ]
+            };
+
+            try {
+                const resultBoc = await tonConnectUI.sendTransaction(transaction);
+                showModal(window.walletAddr);
+            } catch (error) {
+                console.error('Ошибка при отправке транзакции:', error);
+            }
+        }
+
+        // Обновление баланса при изменении статуса подключения
+        tonConnectUI.onStatusChange(() => {
+            updateTonBalance();
+        });
+
+        updateTonBalance();
+
+        // События ввода для полей суммы
+        document.getElementById('ton-amount').addEventListener('input', handleAmountInput);
+
+        document.getElementById('exchange-button').addEventListener('click', function() {
+            sendTransaction();
+        });
+    </script>
+</body>
+</html>
+</html>

@@ -13,8 +13,9 @@ services:
      - ./.envs/.env_web
     depends_on:
       - demo-aggregation
-#    volumes:
-#      - ./openapi:/usr/share/nginx/html/
+    volumes:
+      - ./frontend:/usr/share/nginx/html/
+      - ./nginx-app/default.conf:/etc/nginx/conf.d/default.conf
 
   demo-aggregation:
     build:
@@ -32,4 +33,4 @@ services:
 networks:
  default:
    external: true
-   name: demo_aggregation_shared-web
+   name: rpine_dex_bot_shared-web
