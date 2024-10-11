@@ -61,7 +61,13 @@
         }
 
         .input-group {
-            margin-bottom: 20px;
+            max-width: calc(100%);
+            margin-bottom: 10px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            
         }
 
         label {
@@ -71,8 +77,8 @@
             color: #cccccc;
         }
 
-        div[type="number"] {
-            
+        input[type="number"] {
+            width: 100%;
             padding: 12px;
             margin-top: 10px;
             border: 1px solid #444;
@@ -86,13 +92,13 @@
             text-align: left;
         }
 
-        div[type="number"]::-webkit-outer-spin-button,
-        div[type="number"]::-webkit-inner-spin-button {
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
             -webkit-appearance: none;
             margin: 0;
         }
 
-        div[type="number"]:focus {
+        input[type="number"]:focus {
             outline: none;
             border: 1px solid #444;
         }
@@ -116,8 +122,7 @@
         }
 
         #connectToWallet button  {
-            
-            padding: 22px 136px;
+            padding: 22px 142px;
             border: none;
             border-radius: 4px;
             font-size: 16px;
@@ -205,6 +210,9 @@
                 padding: 22px 10px;
             }
         }
+
+        /*------*/
+
         
         /* Modal styles */
         #transactionModal {
