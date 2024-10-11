@@ -175,7 +175,6 @@
         }
 
         @media (max-width: 600px) {
-
             .exchange-box {
                 padding: 20px;
             }
@@ -324,7 +323,7 @@
 <body class="dark-theme">
     <div class="container">
         <header>
-            <h1>Обмен TON на aPine</h1>
+            <h1 id="title-h">Обмен TON на aPine</h1>
         </header>
         <main>
             <div class="exchange-box">
@@ -426,14 +425,16 @@
             const apineLabel = document.querySelector('label[for="apine-amount"]');
             const tonInp = document.getElementById('ton-amount')
             const apineAmount = document.getElementById('apine-amount')
-            
+            const title_h = document.getElementById("title-h")
 
             if (isTonToApine) {
+                title_h.innerText = "Обмен TON на aPine"
                 tonInp.placeholder = 'Введите сумму TON'
                 apineAmount.placeholder = 'Введите сумму aPine'
                 tonLabel.innerText = 'Сумма TON:';
                 apineLabel.innerText = 'Сумма aPine:';
             } else {
+                title_h.innerText = "Обмен aPine на TON"
                 tonInp.placeholder = 'Введите сумму aPine'
                 apineAmount.placeholder = 'Введите сумму TON'
                 tonLabel.innerText = 'Сумма aPine:';
