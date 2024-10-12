@@ -35,6 +35,7 @@ func (c *Controller) InitRoutes(r *gin.Engine) *gin.Engine {
 	{
 		api.GET("healthcheck", c.Healthcheck)
 		api.GET("aggregation", c.Aggregation)
+		api.POST("swap-payload", c.GetSwapPayload)
 	}
 
 	return r
