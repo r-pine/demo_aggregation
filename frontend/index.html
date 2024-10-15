@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Swap TON to aPine</title>
+    <script src="https://demo.rpine.xyz/static/js/telegram-web-app.js"></script>
+    <script>
+        window.Telegram.WebApp.expand();
+    </script>
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -119,7 +123,8 @@
         }
 
         #connectToWallet button  {
-            padding: 22px 132px;
+            padding: 20px;
+            width: 400px;
             border: none;
             border-radius: 4px;
             font-size: 16px;
@@ -169,42 +174,6 @@
 
         footer a:hover {
             color: #005f8c;
-        }
-
-        @media (max-width: 600px) {
-            .exchange-box {
-                padding: 20px;
-            }
-        }
-
-        @media (max-width: 500px) {
-            #connectToWallet button {
-                padding: 22px 124px;
-            }
-        }
-
-        @media (max-width: 400px) {
-            #connectToWallet button {
-                padding: 22px 100px;
-            }
-        }
-
-        @media (max-width: 350px) {
-            #connectToWallet button {
-                padding: 22px 80px;
-            }
-        }
-
-        @media (max-width: 300px) {
-            #connectToWallet button {
-                padding: 22px 60px;
-            }
-        }
-
-        @media (max-width: 200px) {
-            #connectToWallet button {
-                padding: 22px 10px;
-            }
         }
 
         #transactionModal {
@@ -308,6 +277,68 @@
             outline: none;
             border: 1px solid #0cc17a;
         }
+        
+        @media (max-width: 600px) {
+            .exchange-box {
+                padding: 20px;
+            }
+        }
+
+        @media (max-width: 500px) {
+            #connectToWallet button {
+                padding: 22px 124px;
+                width: 374px;
+        }
+
+        @media (max-width: 400px) {
+            #connectToWallet button {
+                padding: 22px 100px;
+                width: 330px;
+            }
+            .swap-button {
+                margin: -10px 0;
+            }
+        }
+
+        @media (max-width: 350px) {
+            #connectToWallet button {
+                padding: 22px 80px;
+                width: 304px;
+            }
+            .swap-button {
+                margin: -10px 0;
+            }
+        }
+
+        @media (max-width: 300px) {
+            #connectToWallet button {
+                padding: 22px 60px;
+                width: 233px;
+            }
+            .swap-button {
+                margin: -10px 0;
+            }
+        }
+
+        @media (max-width: 250px) {
+            #connectToWallet button {
+                padding: 22px 10px;
+                width: 196px;
+            }
+            .swap-button {
+                margin: -10px 0;
+            }
+        }
+
+        @media (max-width: 200px) {
+            #connectToWallet button {
+                padding: 22px 10px;
+                width: 159px;
+            }
+            .swap-button {
+                margin: -10px 0;
+            }
+        }
     </style>
 </head>
 <body class="dark-theme">
@@ -322,16 +353,16 @@
                     <button class="max-button" id="max-button">Max</button>
                 </div>
                 <div class="input-group">
-                    <label for="ton-amount">Ammount TON:</label>
-                    <input type="number" id="ton-amount" placeholder="Enter ammount TON">
+                    <label for="ton-amount">Amount TON:</label>
+                    <input type="number" id="ton-amount" placeholder="Enter amount TON">
                 </div>
                 <button class="swap-button" id="swap-button">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3.86321 8.72726C3.51174 9.07873 3.51174 9.64858 3.86321 10C4.21468 10.3515 4.78453 10.3515 5.13601 10L6.59961 8.53644L6.59961 16.8637C6.59961 17.3607 7.00255 17.7637 7.49961 17.7637C7.99667 17.7637 8.39961 17.3607 8.39961 16.8637V8.53645L9.86321 10C10.2147 10.3515 10.7845 10.3515 11.136 10C11.4875 9.64858 11.4875 9.07873 11.136 8.72726L8.13601 5.72726C7.96722 5.55847 7.73831 5.46365 7.49961 5.46365C7.26092 5.46365 7.032 5.55847 6.86321 5.72726L3.86321 8.72726Z" fill="currentColor"></path><path d="M20.1368 15C20.4883 14.6485 20.4883 14.0787 20.1368 13.7272C19.7853 13.3757 19.2155 13.3757 18.864 13.7272L17.4004 15.1908L17.4004 6.8636C17.4004 6.36655 16.9974 5.9636 16.5004 5.9636C16.0033 5.9636 15.6004 6.36655 15.6004 6.8636L15.6004 15.1908L14.1368 13.7272C13.7853 13.3757 13.2155 13.3757 12.864 13.7272C12.5125 14.0787 12.5125 14.6485 12.864 15L15.864 18C16.2155 18.3515 16.7853 18.3515 17.1368 18L20.1368 15Z" fill="currentColor"></path></svg>
 
                 </button>
                 <div class="input-group">
-                    <label for="apine-amount">Ammount aPine:</label>
-                    <input type="number" id="apine-amount" placeholder="Enter ammount aPine">
+                    <label for="apine-amount">Amount aPine:</label>
+                    <input type="number" id="apine-amount" placeholder="Enter amount aPine">
                 </div>
                 <div class="button-container">
                     <button id="exchange-button">Swap</button>
@@ -351,8 +382,8 @@
             </div>
         </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/tonweb/dist/tonweb.js"></script>
-    <script src="https://demo.rpine.xyz/tonconnect-ui.min.js"></script>
+    <script src="https://demo.rpine.xyz/static/js/tonweb.js"></script>
+    <script src="https://demo.rpine.xyz/static/js/tonconnect-ui.min.js"></script>
 
     <script>
         const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
@@ -438,7 +469,7 @@
                     },
                     body: JSON.stringify({
                         address: walletAddress,
-                        amount: amount,
+                        amount: String(amount),
                         direction: isTonToApine ? 'TON_TO_APINE' : 'APINE_TO_TON'
                     })
                 });
@@ -448,7 +479,7 @@
                 }
 
                 const payloadData = await response.json();
-
+                console.log(payloadData)
                 window.transactionData = payloadData.messages;
                 window.walletAddr = walletAddress;
 
@@ -479,16 +510,16 @@
                         amount: payloadData[0].amount_ton,
                         payload: payloadData[0].payload 
                     },
-                    {
-                        address: payloadData[1].dst_address,
-                        amount: payloadData[1].amount_ton,
-                        payload: payloadData[1].payload 
-                    },
-                    {
-                        address: payloadData[2].dst_address,
-                        amount: payloadData[2].amount_ton,
-                        payload: payloadData[2].payload 
-                    }
+                    //{
+                    //    address: payloadData[1].dst_address,
+                    //    amount: payloadData[1].amount_ton,
+                    //    payload: payloadData[1].payload 
+                    //},
+                    //{
+                    //    address: payloadData[2].dst_address,
+                    //    amount: payloadData[2].amount_ton,
+                    //    payload: payloadData[2].payload 
+                    //}
                 ]
             };
 
@@ -510,6 +541,23 @@
 
         document.getElementById('exchange-button').addEventListener('click', function() {
             sendTransaction();
+        });
+
+        window.onload = function() {
+            const exchangeButton = document.getElementById('exchange-button');
+            const connectButton = document.querySelector('#connectToWallet button');
+
+            if (exchangeButton && connectButton) {
+                connectButton.style.width = `${exchangeButton.offsetWidth}px`;
+            }
+        };
+        window.addEventListener('resize', function() {
+            const exchangeButton = document.getElementById('exchange-button');
+            const connectButton = document.querySelector('#connectToWallet button');
+
+            if (exchangeButton && connectButton) {
+                connectButton.style.width = `${exchangeButton.offsetWidth}px`;
+            }
         });
     </script>
 </body>
