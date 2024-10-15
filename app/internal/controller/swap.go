@@ -15,8 +15,8 @@ import (
 )
 
 const (
-	pTonPrivateAddress = ""
-	privateAddress     = ""
+	pTonPrivateAddress = "EQABxQiQSPSCFMM12RcW2uzeujZ2s4J8X3utZmy7BJgJXssJ"
+	privateAddress     = "EQCp5UpUBZIbdold9sqUeU-1gFAF_8Mk-QQKIEXgbFtat8Um"
 	aPineToTon         = "APINE_TO_TON"
 )
 
@@ -80,7 +80,17 @@ func (c *Controller) GetSwapPayload(ctx *gin.Context) {
 	}
 	if swapTonToApine {
 		_, privateAmountIn, bestOutput := blockchain.Swap(amountToFloat, res, swapTonToApine)
-		privateBody := buildPrivateTonToJettonBody(privateAmountIn, br.Address)
+		privateMessage := buildPrivateTonToJettonBody(privateAmountIn, br.Address)
+		var msgs []Message
+		msgs = append(msgs, privateMessage)
+
+		ctx.JSON(
+			http.StatusOK,
+			&BodyResponse{
+				Msgs:                msgs,
+				SumCalculatedAmount: strconv.FormatFloat(bestOutput, 'f', 6, 64),
+			},
+		)
 	}
 }
 
@@ -108,7 +118,7 @@ func buildPrivateTonToJettonBody(privateAmountIn float64, userAddr string) Messa
 		MustStoreUInt(0x8f637488, 32).
 		MustStoreUInt(0, 64).
 		MustStoreBigCoins(big.NewInt(int64(privateAmountIn))).
-		MustStoreAddr(address.MustParseRawAddr(pTonPrivateAddress)).
+		MustStoreAddr(address.MustParseAddr(pTonPrivateAddress)).
 		MustStoreRef(fwdPayload).
 		EndCell()
 	return Message{
