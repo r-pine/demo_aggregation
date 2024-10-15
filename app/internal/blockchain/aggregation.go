@@ -114,7 +114,7 @@ func (a *Aggregation) getAccountData(
 	}
 
 	var (
-		fee      int64
+		fee      int
 		reserve0 int64
 		reserve1 int64
 	)
@@ -141,11 +141,12 @@ func (a *Aggregation) getAccountData(
 	}
 
 	pl := entity.Platform{
+		Name: contractName,
 		Address: entity.Address{
 			Bounce:   res.State.Address.Bounce(true).String(),
 			UnBounce: res.State.Address.Bounce(false).String(),
 		},
-		Fee:      fee,
+		Fee:      float64(fee),
 		Reserve0: float64(reserve0),
 		Reserve1: float64(reserve1),
 		IsActive: res.IsActive,
@@ -195,7 +196,7 @@ func (a *Aggregation) getFeeAndReservesPrivate(res *tlb.Account) (int64, int64, 
 	return 0, 0, 0
 }
 
-func (a *Aggregation) getFeeAndReservesStonFi(res *tlb.Account) (int64, int64, int64) {
+func (a *Aggregation) getFeeAndReservesStonFi(res *tlb.Account) (int, int64, int64) {
 	// adminAddr := slice.MustLoadAddr()
 	// lpFee := slice.MustLoadUInt(8)
 	// protocolFee := slice.MustLoadUInt(8)
@@ -223,7 +224,7 @@ func (a *Aggregation) getFeeAndReservesStonFi(res *tlb.Account) (int64, int64, i
 		reserve0 := ref.MustLoadBigCoins().Int64()
 		reserve1 := ref.MustLoadBigCoins().Int64()
 		fee := lpFee + protocolFee
-		return int64(fee), reserve0, reserve1
+		return int(fee), reserve0, reserve1
 	}
 	return 0, 0, 0
 }
@@ -232,7 +233,7 @@ func (a *Aggregation) getFeesDedust(
 	api ton.APIClientWrapped,
 	b *ton.BlockIDExt,
 	contractAddress string,
-) (int64, error) {
+) (int, error) {
 	result, err := api.RunGetMethod(
 		a.ctx, b, address.MustParseAddr(contractAddress), "get_trade_fee",
 	)
@@ -249,7 +250,7 @@ func (a *Aggregation) getFeesDedust(
 	// 	return 0, errors.New("run ParseInt f2 err:" + err.Error())
 	// }
 	// fee := f1 / f2
-	return fee, nil
+	return int(fee), nil
 }
 
 func (a *Aggregation) getReservesDedust(

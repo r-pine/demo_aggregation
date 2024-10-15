@@ -5,8 +5,9 @@ type Aggregation struct {
 }
 
 type Platform struct {
+	Name     string  `json:"name"`
 	Address  Address `json:"address"`
-	Fee      int64   `json:"fee"`
+	Fee      float64 `json:"fee"`
 	Reserve0 float64 `json:"reserve0"`
 	Reserve1 float64 `json:"reserve1"`
 	IsActive bool    `json:"is_active"`
@@ -16,7 +17,6 @@ type Platform struct {
 	NewPrice float64 `json:"-"`
 	Dx       float64 `json:"-"`
 	Dy       float64 `json:"-"`
-	PoolFee  int     `json:"-"`
 }
 
 type Address struct {
