@@ -5,3 +5,4 @@
 .envs/.env_letsencrypt
 .docker-volumes
 venv
+build/main

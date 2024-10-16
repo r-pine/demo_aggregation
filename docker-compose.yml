@@ -21,7 +21,7 @@ services:
     build:
       dockerfile: ./Dockerfile
     container_name: demo-aggregation
-    command: ["go", "run", "./app/cmd/main/main.go"]
+    # command: ["go", "run", "./app/cmd/main/main.go"]
     env_file:
       - ./.envs/.env
     ports:
