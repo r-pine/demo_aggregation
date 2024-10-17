@@ -15,9 +15,12 @@ import (
 )
 
 const (
-	pTonPrivateAddress = "EQABxQiQSPSCFMM12RcW2uzeujZ2s4J8X3utZmy7BJgJXssJ"
-	privateAddress     = "EQCp5UpUBZIbdold9sqUeU-1gFAF_8Mk-QQKIEXgbFtat8Um"
-	aPineToTon         = "APINE_TO_TON"
+	pTonPrivateAddress  = "EQABxQiQSPSCFMM12RcW2uzeujZ2s4J8X3utZmy7BJgJXssJ"
+	privateAddress      = "EQCp5UpUBZIbdold9sqUeU-1gFAF_8Mk-QQKIEXgbFtat8Um"
+	aPineToTon          = "APINE_TO_TON"
+	stonfiAddress       = "EQB3ncyBUTjZUA5EnFKR5_EnOMI9V1tTEAAPaiU71gc4TiUt"
+	pTonStonfiAddress   = "EQARULUYsmJq1RiZ-YiH-IJLcAZUVkVff-KBPwEmmaQGH6aC"
+	jettonStonfiAddress = ""
 )
 
 type Message struct {
@@ -94,7 +97,7 @@ func (c *Controller) GetSwapPayload(ctx *gin.Context) {
 	}
 }
 
-func buildPrivateTonToJettonBody(privateAmountIn float64, userAddr string) Message {
+func buildPrivateTonToJettonBody(privateAmountIn float64, userAddr string, refAddr *string) Message {
 
 	gasConsumption := 13000000                        // 13000000n
 	fwdAmountPrivatePool := 0.1 * blockchain.NanoUnit // 100000000
@@ -105,25 +108,123 @@ func buildPrivateTonToJettonBody(privateAmountIn float64, userAddr string) Messa
 		MustStoreAddr(address.MustParseRawAddr(userAddr)).
 		MustStoreBigCoins(big.NewInt(int64(privateAmountIn))).
 		MustStoreBigCoins(big.NewInt(1)).
-		MustStoreBoolBit(false).
-		MustStoreBoolBit(true).
-		MustStoreRef(
-			cell.BeginCell().
-				MustStoreAddr(address.MustParseRawAddr(userAddr)).
-				MustStoreAddr(nil).
-				EndCell(),
-		).EndCell()
+		MustStoreBoolBit(refAddr != nil).
+	
+	if refAddr != nil {
+		fwdPayload.MustStoreAddr(address.MustParseAddr(refAddr))
+	}
 
 	body := cell.BeginCell().
 		MustStoreUInt(0x8f637488, 32).
-		MustStoreUInt(0, 64).
+		MustStoreUInt(rand.Uint64(), 64).
 		MustStoreBigCoins(big.NewInt(int64(privateAmountIn))).
 		MustStoreAddr(address.MustParseAddr(pTonPrivateAddress)).
-		MustStoreRef(fwdPayload).
+		MustStoreRef(fwdPayload.EndCell()).
 		EndCell()
 	return Message{
 		AmountTon:  tlb.MustFromTON(strconv.FormatFloat(value, 'f', 6, 64)).String(),
 		DstAddress: privateAddress,
+		Payload:    base64.StdEncoding.EncodeToString(body.ToBOC()),
+	}
+}
+
+func buildPrivateJettonToTonBody(privateAmountIn float64, userAddr string, refAddr *string) Message {
+	fwdPayload := cell.BeginCell().
+		MustStoreUInt(0x25938561, 32).
+		MustStoreAddr(address.MustParseRawAddr(userAddr)).
+		MustStoreBigCoins(big.NewInt(int64(privateAmountIn))).
+		MustStoreBigCoins(big.NewInt(1)).
+		MustStoreBoolBit(refAddr != nil).
+	
+	if refAddr != nil {
+		fwdPayload.MustStoreAddr(address.MustParseAddr(refAddr))
+	}
+
+	body := cell.BeginCell()
+		MustStoreUInt(0xf8a7ea5, 32).
+		MustStoreUInt(rand.Uint64(), 64).
+		MustStoreBigCoins(big.NewInt(int64(privateAmountIn))).
+		MustStoreAddr(address.MustParseAddr(privateAddress)).
+		MustStoreAddr(address.MustParseAddr(userAddr)).
+		MustStoreBoolBit(false).
+		MustStoreBigCoins(0.1 * blockchain.NanoUnit).
+		MustStoreBoolBit(true).
+		MustStoreRef(fwdPayload.EndCell()).
+		EndCell()
+
+	userJettonWalletAddress := address.MustParseAddr(nil) // retrieve user jetton wallet address from userAddr
+
+	return Message{
+		AmountTon:  tlb.MustFromTON(strconv.FormatFloat(0.2 * blockchain.NanoUnit, 'f', 6, 64)).String(),
+		DstAddress: userJettonWalletAddress,
+		Payload:    base64.StdEncoding.EncodeToString(body.ToBOC()),
+	}
+}
+
+func buildStonfiTonToJettonBody(privateAmountIn float64, userAddr string, refAddr *string) Message {
+	fwdPayload := cell.BeginCell().
+		MustStoreUInt(0x25938561, 32).
+		MustStoreAddr(address.MustParseRawAddr(jettonStonfiAddress)).
+		MustStoreBigCoins(big.NewInt(1)).
+		MustStoreAddr(address.MustParseRawAddr(userAddr)).
+		MustStoreBoolBit(refAddr != nil).
+	
+	if refAddr != nil {
+		fwdPayload.MustStoreAddr(address.MustParseAddr(refAddr))
+	}
+
+	fwdAmount := 0.25 * blockchain.NanoUnit
+
+	body := cell.BeginCell()
+		MustStoreUInt(0xf8a7ea5, 32).
+		MustStoreUInt(rand.Uint64(), 64).
+		MustStoreBigCoins(big.NewInt(int64(privateAmountIn))).
+		MustStoreAddr(address.MustParseAddr(stonfiAddress)).
+		MustStoreAddr(address.MustParseAddr(userAddr)).
+		MustStoreBoolBit(false).
+		MustStoreBigCoins(fwdAmount).
+		MustStoreBoolBit(true).
+		MustStoreRef(fwdPayload.EndCell()).
+		EndCell()
+
+	return Message{
+		AmountTon:  tlb.MustFromTON(strconv.FormatFloat(privateAmountIn + fwdAmount, 'f', 6, 64)).String(),
+		DstAddress: pTonStonfiAddress,
+		Payload:    base64.StdEncoding.EncodeToString(body.ToBOC()),
+	}
+}
+
+func buildStonfiJettonToTonBody(privateAmountIn float64, userAddr string, refAddr *string) Message {
+	fwdPayload := cell.BeginCell().
+		MustStoreUInt(0x25938561, 32).
+		MustStoreAddr(address.MustParseRawAddr(pTonStonfiAddress)).
+		MustStoreBigCoins(big.NewInt(1)).
+		MustStoreAddr(address.MustParseRawAddr(userAddr)).
+		MustStoreBoolBit(refAddr != nil).
+	
+	if refAddr != nil {
+		fwdPayload.MustStoreAddr(address.MustParseAddr(refAddr))
+	}
+
+	fwdAmount := 0.25 * blockchain.NanoUnit
+
+	body := cell.BeginCell()
+		MustStoreUInt(0xf8a7ea5, 32).
+		MustStoreUInt(rand.Uint64(), 64).
+		MustStoreBigCoins(big.NewInt(int64(privateAmountIn))).
+		MustStoreAddr(address.MustParseAddr(stonfiAddress)).
+		MustStoreAddr(address.MustParseAddr(userAddr)).
+		MustStoreBoolBit(false).
+		MustStoreBigCoins(fwdAmount).
+		MustStoreBoolBit(true).
+		MustStoreRef(fwdPayload.EndCell()).
+		EndCell()
+
+	userJettonWalletAddress := address.MustParseAddr(nil) // retrieve user jetton wallet address from userAddr
+
+	return Message{
+		AmountTon:  tlb.MustFromTON(strconv.FormatFloat(fwdAmount + 0.05 * blockchain.NanoUnit, 'f', 6, 64)).String(),
+		DstAddress: userJettonWalletAddress,
 		Payload:    base64.StdEncoding.EncodeToString(body.ToBOC()),
 	}
 }
