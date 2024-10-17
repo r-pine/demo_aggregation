@@ -7,59 +7,64 @@ import (
 	"github.com/xssnick/tonutils-go/tvm/cell"
 )
 
-func packSwapStep(
-	poolAddress *address.Address,
-	limit *big.Int,
-	next *cell.Cell,
-) *cell.Cell {
+type SwapStep struct {
+	PoolAddress string    `json:"pool_address"`
+	Limit       *big.Int  `json:"limit,omitempty"` // Use pointer to represent optional value
+	Next        *SwapStep `json:"next,omitempty"`  // Use pointer for recursive structure
+}
+
+// SwapParams represents the parameters for a swap.
+type SwapParams struct {
+	Deadline         *uint64    `json:"deadline,omitempty"`         // Use pointer for optional value
+	RecipientAddress *string    `json:"recipientAddress,omitempty"` // Use pointer for optional value
+	ReferralAddress  *string    `json:"referralAddress,omitempty"`  // Use pointer for optional value
+	FulfillPayload   *cell.Cell `json:"fulfillPayload,omitempty"`   // Use pointer for optional value
+	RejectPayload    *cell.Cell `json:"rejectPayload,omitempty"`    // Use pointer for optional value
+}
+
+func PackSwapStep(step SwapStep) *cell.Cell {
 	swapStep := cell.BeginCell().
-		MustStoreAddr(poolAddress).
+		MustStoreAddr(address.MustParseAddr(step.PoolAddress)).
 		MustStoreUInt(0, 1)
 
-	if limit != nil {
-		swapStep.MustStoreBigCoins(limit)
+	if step.Limit != nil {
+		swapStep.MustStoreBigCoins(step.Limit)
 	} else {
 		swapStep.MustStoreBigCoins(big.NewInt(0))
 	}
 
-	if next != nil {
-		swapStep.MustStoreMaybeRef(next)
+	if step.Next != nil {
+		swapStep.MustStoreMaybeRef(PackSwapStep(*step.Next))
 	} else {
 		swapStep.MustStoreMaybeRef(nil)
 	}
 	return swapStep.EndCell()
 }
 
-func packSwapParams(
-	deadline *uint64,
-	recipientAddress *address.Address,
-	referralAddress *address.Address,
-	fulfillPayload *cell.Cell,
-	rejectPayload *cell.Cell,
-) *cell.Cell {
+func PackSwapParams(params SwapParams) *cell.Cell {
 	swapParams := cell.BeginCell()
-	if deadline != nil {
-		swapParams.MustStoreUInt(*deadline, 32)
+	if params.Deadline != nil {
+		swapParams.MustStoreUInt(*params.Deadline, 32)
 	} else {
 		swapParams.MustStoreUInt(0, 32)
 	}
-	if recipientAddress != nil {
-		swapParams.MustStoreAddr(recipientAddress)
+	if params.RecipientAddress != nil {
+		swapParams.MustStoreAddr(address.MustParseAddr(*params.RecipientAddress))
 	} else {
 		swapParams.MustStoreAddr(nil)
 	}
-	if referralAddress != nil {
-		swapParams.MustStoreAddr(referralAddress)
+	if params.ReferralAddress != nil {
+		swapParams.MustStoreAddr(address.MustParseAddr(*params.ReferralAddress))
 	} else {
 		swapParams.MustStoreAddr(nil)
 	}
-	if fulfillPayload != nil {
-		swapParams.MustStoreMaybeRef(fulfillPayload)
+	if params.FulfillPayload != nil {
+		swapParams.MustStoreMaybeRef(params.FulfillPayload)
 	} else {
 		swapParams.MustStoreMaybeRef(nil)
 	}
-	if rejectPayload != nil {
-		swapParams.MustStoreMaybeRef(rejectPayload)
+	if params.RejectPayload != nil {
+		swapParams.MustStoreMaybeRef(params.RejectPayload)
 	} else {
 		swapParams.MustStoreMaybeRef(nil)
 	}
