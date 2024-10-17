@@ -15,23 +15,20 @@ func Swap(
 	amountToFloat float64,
 	aggregation entity.Aggregation,
 	tonToAPine bool,
-) (float64, float64, float64) {
+) (float64, float64, float64, float64, float64) {
 	inputAmount := amountToFloat * NanoUnit
 
 	bestOutput := 0.0
 	bestCombination := ""
 
-	var (
-		privateAmountIn float64
-	)
+	var privateAmountIn, stonfiAmountIn, dedustAmountIn float64
 
 	// Считаем вывод для каждого DEX
 	fmt.Println("Обмен на одном DEX:")
+	var bestName string
+	var bestPortion float64
 	for name, dex := range aggregation.Dex {
 		portion := inputAmount - networkFee
-		if name == "private" {
-			privateAmountIn = portion / NanoUnit
-		}
 		output := exchangeOnSingleDex(dex, inputAmount, networkFee, tonToAPine)
 		percentage := (portion / inputAmount) * 100
 		if tonToAPine {
@@ -43,7 +40,19 @@ func Swap(
 		if output > bestOutput {
 			bestOutput = output
 			bestCombination = fmt.Sprintf("Обмен на одном DEX: %s", name)
+			bestName = name
+			bestPortion = portion
 		}
+	}
+
+	if bestName == "private" {
+		privateAmountIn = bestPortion / NanoUnit
+	}
+	if bestName == "stonfi" {
+		stonfiAmountIn = bestPortion / NanoUnit
+	}
+	if bestName == "dedust" {
+		dedustAmountIn = bestPortion / NanoUnit
 	}
 
 	// Считаем вывод для двух DEX
@@ -53,15 +62,12 @@ func Swap(
 		{"stonfi", "private"},
 		{"dedust", "private"},
 	}
-
-	for _, combination := range combinations {
+	var bestPortion1, bestPortion2 float64
+	bestCombIndex := 10
+	for i, combination := range combinations {
 		dex1 := aggregation.Dex[combination[0]]
 		dex2 := aggregation.Dex[combination[1]]
 		output, portion1, portion2 := exchangeOnTwoDex(dex1, dex2, inputAmount, networkFee, tonToAPine)
-
-		if combination[1] == "private" {
-			privateAmountIn = portion2 / NanoUnit
-		}
 
 		percentage1 := (portion1 / inputAmount) * 100
 		percentage2 := (portion2 / inputAmount) * 100
@@ -76,6 +82,24 @@ func Swap(
 		if output > bestOutput {
 			bestOutput = output
 			bestCombination = fmt.Sprintf("Обмен на двух DEX: %s + %s", combination[0], combination[1])
+
+			bestPortion1 = portion1
+			bestPortion2 = portion2
+			bestCombIndex = i
+		}
+	}
+	if bestPortion1 != 0.0 && bestPortion2 != 0.0 {
+		if combinations[bestCombIndex][1] == "private" {
+			privateAmountIn = bestPortion2 / NanoUnit
+		}
+		if combinations[bestCombIndex][1] == "dedust" {
+			dedustAmountIn = bestPortion2 / NanoUnit
+		}
+		if combinations[bestCombIndex][0] == "dedust" {
+			dedustAmountIn = bestPortion1 / NanoUnit
+		}
+		if combinations[bestCombIndex][0] == "stonfi" {
+			stonfiAmountIn = bestPortion1 / NanoUnit
 		}
 	}
 
@@ -89,10 +113,8 @@ func Swap(
 		} else {
 			fmt.Printf("- %s: отправляем %.6f aPine (%.2f%% после комиссии)\n", name, portion/NanoUnit, percentage)
 		}
-		if name == "private" {
-			privateAmountIn = portion / NanoUnit
-		}
 	}
+
 	if tonToAPine {
 		fmt.Printf("Общий выход: %.6f aPine\n", totalOutput)
 	} else {
@@ -100,8 +122,20 @@ func Swap(
 	}
 
 	if totalOutput > bestOutput {
+		fmt.Println("totalOutput", totalOutput)
 		bestOutput = totalOutput
 		bestCombination = "Оптимальное распределение на всех DEX"
+		for name, portion := range bestDistribution {
+			if name == "private" {
+				privateAmountIn = portion / NanoUnit
+			}
+			if name == "stonfi" {
+				stonfiAmountIn = portion / NanoUnit
+			}
+			if name == "dedust" {
+				dedustAmountIn = portion / NanoUnit
+			}
+		}
 	}
 
 	if tonToAPine {
@@ -109,7 +143,7 @@ func Swap(
 	} else {
 		fmt.Printf("\nСамая лучшая комбинация: %s с общим выходом %.6f TON\n", bestCombination, bestOutput)
 	}
-	return inputAmount, privateAmountIn, bestOutput
+	return inputAmount, privateAmountIn, stonfiAmountIn, dedustAmountIn, bestOutput
 }
 
 // Функция для расчета выхода с учетом резервов и комиссий

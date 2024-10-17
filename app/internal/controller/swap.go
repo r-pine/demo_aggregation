@@ -2,6 +2,7 @@ package controller
 
 import (
 	"encoding/base64"
+	"fmt"
 	"math/big"
 	"math/rand/v2"
 	"net/http"
@@ -53,20 +54,20 @@ func (c *Controller) GetSwapPayload(ctx *gin.Context) {
 		Dex: map[string]entity.Platform{
 			"stonfi": {
 				Name:     "stonfi",
-				Reserve0: 200000000000,
-				Reserve1: 6666666666666660,
+				Reserve0: 209600000000,
+				Reserve1: 6374046920634660,
 				Fee:      30,
 			},
 			"dedust": {
 				Name:     "dedust",
-				Reserve0: 77905132253,
-				Reserve1: 6666666666666660,
+				Reserve0: 209600000000,
+				Reserve1: 6374046920634660,
 				Fee:      25,
 			},
 			"private": {
 				Name:     "private",
-				Reserve0: 200000000000,
-				Reserve1: 6666666666666660,
+				Reserve0: 209600000000,
+				Reserve1: 6374046920634660,
 				Fee:      20,
 			},
 		},
@@ -82,11 +83,16 @@ func (c *Controller) GetSwapPayload(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 		return
 	}
+	_, privateAmountIn, stonfiAmountIn, dedustAmountIn, bestOutput := blockchain.Swap(amountToFloat, res, swapTonToApine)
+	fmt.Println("privateAmountIn", privateAmountIn)
+	fmt.Println("stonfiAmountIn", stonfiAmountIn)
+	fmt.Println("dedustAmountIn", dedustAmountIn)
 	if swapTonToApine {
-		_, privateAmountIn, bestOutput := blockchain.Swap(amountToFloat, res, swapTonToApine)
 		privateMessage := buildPrivateTonToJettonBody(privateAmountIn, br.Address, nil)
 		var msgs []Message
 		msgs = append(msgs, privateMessage)
+
+		// TODO: add timestamp
 
 		ctx.JSON(
 			http.StatusOK,
@@ -95,6 +101,7 @@ func (c *Controller) GetSwapPayload(ctx *gin.Context) {
 				SumCalculatedAmount: strconv.FormatFloat(bestOutput, 'f', 6, 64),
 			},
 		)
+		return
 	}
 }
 
