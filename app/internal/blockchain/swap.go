@@ -122,7 +122,6 @@ func Swap(
 	}
 
 	if totalOutput > bestOutput {
-		fmt.Println("totalOutput", totalOutput)
 		bestOutput = totalOutput
 		bestCombination = "Оптимальное распределение на всех DEX"
 		for name, portion := range bestDistribution {

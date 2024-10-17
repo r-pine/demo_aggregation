@@ -7,7 +7,11 @@ import (
 	"github.com/xssnick/tonutils-go/tvm/cell"
 )
 
-func packSwapStep(poolAddress *address.Address, limit *big.Int, next *cell.Cell) *cell.Cell {
+func packSwapStep(
+	poolAddress *address.Address,
+	limit *big.Int,
+	next *cell.Cell,
+) *cell.Cell {
 	swapStep := cell.BeginCell().
 		MustStoreAddr(poolAddress).
 		MustStoreUInt(0, 1)
@@ -26,7 +30,13 @@ func packSwapStep(poolAddress *address.Address, limit *big.Int, next *cell.Cell)
 	return swapStep.EndCell()
 }
 
-func packSwapParams(deadline *uint64, recipientAddress *address.Address, referralAddress *address.Address, fulfillPayload *cell.Cell, rejectPayload *cell.Cell) *cell.Cell {
+func packSwapParams(
+	deadline *uint64,
+	recipientAddress *address.Address,
+	referralAddress *address.Address,
+	fulfillPayload *cell.Cell,
+	rejectPayload *cell.Cell,
+) *cell.Cell {
 	swapParams := cell.BeginCell()
 	if deadline != nil {
 		swapParams.MustStoreUInt(*deadline, 32)

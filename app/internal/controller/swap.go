@@ -87,10 +87,20 @@ func (c *Controller) GetSwapPayload(ctx *gin.Context) {
 	fmt.Println("privateAmountIn", privateAmountIn)
 	fmt.Println("stonfiAmountIn", stonfiAmountIn)
 	fmt.Println("dedustAmountIn", dedustAmountIn)
+	var msgs []Message
 	if swapTonToApine {
-		privateMessage := buildPrivateTonToJettonBody(privateAmountIn, br.Address, nil)
-		var msgs []Message
-		msgs = append(msgs, privateMessage)
+		if privateAmountIn > 0 {
+			privateMessage := buildPrivateTonToJettonBody(privateAmountIn, br.Address, nil)
+			msgs = append(msgs, privateMessage)
+		}
+		if stonfiAmountIn > 0 {
+			stonfiMessage := buildStonfiTonToJettonBody(stonfiAmountIn, br.Address, nil)
+			msgs = append(msgs, stonfiMessage)
+		}
+		// if dedustAmountIn > 0 {
+		// 	dedustMessage := buildDedustTonToJettonBody(dedustAmountIn, br.Address, nil)
+		// 	msgs = append(msgs, dedustMessage)
+		// }
 
 		// TODO: add timestamp
 
@@ -168,7 +178,7 @@ func buildPrivateJettonToTonBody(privateAmountIn float64, userAddr string, refAd
 	}
 }
 
-func buildStonfiTonToJettonBody(privateAmountIn float64, userAddr string, refAddr *string) Message {
+func buildStonfiTonToJettonBody(stonfiAmountIn float64, userAddr string, refAddr *string) Message {
 	fwdPayload := cell.BeginCell().
 		MustStoreUInt(0x25938561, 32).
 		MustStoreAddr(address.MustParseRawAddr(jettonStonfiAddress)).
@@ -185,7 +195,7 @@ func buildStonfiTonToJettonBody(privateAmountIn float64, userAddr string, refAdd
 	body := cell.BeginCell().
 		MustStoreUInt(0xf8a7ea5, 32).
 		MustStoreUInt(rand.Uint64(), 64).
-		MustStoreBigCoins(big.NewInt(int64(privateAmountIn))).
+		MustStoreBigCoins(big.NewInt(int64(stonfiAmountIn))).
 		MustStoreAddr(address.MustParseAddr(stonfiAddress)).
 		MustStoreAddr(address.MustParseAddr(userAddr)).
 		MustStoreBoolBit(false).
@@ -195,13 +205,13 @@ func buildStonfiTonToJettonBody(privateAmountIn float64, userAddr string, refAdd
 		EndCell()
 
 	return Message{
-		AmountTon:  tlb.MustFromTON(strconv.FormatFloat(privateAmountIn+fwdAmount, 'f', 6, 64)).String(),
+		AmountTon:  tlb.MustFromTON(strconv.FormatFloat(stonfiAmountIn+fwdAmount, 'f', 6, 64)).String(),
 		DstAddress: pTonStonfiAddress,
 		Payload:    base64.StdEncoding.EncodeToString(body.ToBOC()),
 	}
 }
 
-func buildStonfiJettonToTonBody(privateAmountIn float64, userAddr string, refAddr *string) Message {
+func buildStonfiJettonToTonBody(stonfiAmountIn float64, userAddr string, refAddr *string) Message {
 	fwdPayload := cell.BeginCell().
 		MustStoreUInt(0x25938561, 32).
 		MustStoreAddr(address.MustParseRawAddr(pTonStonfiAddress)).
@@ -218,7 +228,7 @@ func buildStonfiJettonToTonBody(privateAmountIn float64, userAddr string, refAdd
 	body := cell.BeginCell().
 		MustStoreUInt(0xf8a7ea5, 32).
 		MustStoreUInt(rand.Uint64(), 64).
-		MustStoreBigCoins(big.NewInt(int64(privateAmountIn))).
+		MustStoreBigCoins(big.NewInt(int64(stonfiAmountIn))).
 		MustStoreAddr(address.MustParseAddr(stonfiAddress)).
 		MustStoreAddr(address.MustParseAddr(userAddr)).
 		MustStoreBoolBit(false).
