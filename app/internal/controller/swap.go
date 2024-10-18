@@ -1,7 +1,6 @@
 package controller
 
 import (
-	"context"
 	"encoding/base64"
 	"fmt"
 	"math/big"
@@ -17,6 +16,7 @@ import (
 	"github.com/xssnick/tonutils-go/liteclient"
 	"github.com/xssnick/tonutils-go/tlb"
 	"github.com/xssnick/tonutils-go/ton"
+	"github.com/xssnick/tonutils-go/ton/jetton"
 	"github.com/xssnick/tonutils-go/tvm/cell"
 )
 
@@ -83,6 +83,17 @@ func (c *Controller) GetSwapPayload(ctx *gin.Context) {
 		},
 	}
 
+	// data, err := c.sc.Get("states")
+	// if err != nil {
+	// 	ctx.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	// 	return
+	// }
+	// var res *entity.Aggregation
+	// if err := json.Unmarshal([]byte(data), &res); err != nil {
+	// 	ctx.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+	// 	return
+	// }
+
 	swapTonToApine := true
 	if br.Direction == aPineToTon {
 		swapTonToApine = false
@@ -100,38 +111,23 @@ func (c *Controller) GetSwapPayload(ctx *gin.Context) {
 
 	client := liteclient.NewConnectionPool()
 
-	err = client.AddConnectionsFromConfigUrl(context.Background(), configUrl)
+	err = client.AddConnectionsFromConfigUrl(ctx, configUrl)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 		return
 	}
 	api := ton.NewAPIClient(client)
 
-	block, err := api.CurrentMasterchainInfo(context.Background())
+	tokenContract := address.MustParseAddr(aPineMaster)
+	master := jetton.NewJettonMasterClient(api, tokenContract)
+	jettonWallet, err := master.GetJettonWallet(ctx, address.MustParseRawAddr(br.Address))
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
-		return
-	}
-	addr := address.MustParseAddr(aPineMaster)
-	resMethod, err := api.RunGetMethod(
-		ctx,
-		block,
-		addr,
-		"get_wallet_address",
-		address.MustParseRawAddr(br.Address),
-	)
-	if err != nil {
+		fmt.Println(err)
 		ctx.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 		return
 	}
 
-	userJettonAddress, err := resMethod.MustCell(0).BeginParse().LoadAddr()
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
-		return
-	}
-
-	fmt.Println(userJettonAddress.Bounce(true).String())
+	userJettonAddress := jettonWallet.Address()
 
 	var msgs []Message
 	if swapTonToApine {
