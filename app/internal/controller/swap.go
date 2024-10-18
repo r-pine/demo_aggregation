@@ -29,7 +29,7 @@ const (
 	privateAddress      = "EQCp5UpUBZIbdold9sqUeU-1gFAF_8Mk-QQKIEXgbFtat8Um"
 	stonfiAddress       = "EQB3ncyBUTjZUA5EnFKR5_EnOMI9V1tTEAAPaiU71gc4TiUt"
 	pTonStonfiAddress   = "EQARULUYsmJq1RiZ-YiH-IJLcAZUVkVff-KBPwEmmaQGH6aC"
-	jettonStonfiAddress = "nil"
+	aPineStonfiAddress = "nil"
 	dedustVaultNative   = "EQDa4VOnTYlLvDJ0gZjNYm5PXfSmmtL6Vs6A_CZEtXCNICq_"
 	dedustVaultJetton   = "nil"
 	dedustPoolAddress   = "nil"
@@ -261,7 +261,7 @@ func buildPrivateJettonToTonBody(
 func buildStonfiTonToJettonBody(stonfiAmountIn float64, userAddr string, refAddr *string) Message {
 	fwdPayload := cell.BeginCell().
 		MustStoreUInt(0x25938561, 32).
-		MustStoreAddr(address.MustParseRawAddr(jettonStonfiAddress)).
+		MustStoreAddr(address.MustParseRawAddr(aPineStonfiAddress)).
 		MustStoreBigCoins(big.NewInt(1)).
 		MustStoreAddr(address.MustParseRawAddr(userAddr)).
 		MustStoreBoolBit(refAddr != nil)
