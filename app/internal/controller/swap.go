@@ -24,15 +24,15 @@ const (
 	aPineToTon = "APINE_TO_TON"
 	configUrl  = "https://ton-blockchain.github.io/testnet-global.config.json"
 
-	aPineMaster         = "EQAjWFZaH0Xib0VGEwe3148Hg7arST5mhJwDB3YTIS0OFUxJ"
-	pTonPrivateAddress  = "EQABxQiQSPSCFMM12RcW2uzeujZ2s4J8X3utZmy7BJgJXssJ"
-	privateAddress      = "EQCp5UpUBZIbdold9sqUeU-1gFAF_8Mk-QQKIEXgbFtat8Um"
-	stonfiAddress       = "EQB3ncyBUTjZUA5EnFKR5_EnOMI9V1tTEAAPaiU71gc4TiUt"
-	pTonStonfiAddress   = "EQARULUYsmJq1RiZ-YiH-IJLcAZUVkVff-KBPwEmmaQGH6aC"
+	aPineMaster        = "EQAjWFZaH0Xib0VGEwe3148Hg7arST5mhJwDB3YTIS0OFUxJ"
+	pTonPrivateAddress = "EQABxQiQSPSCFMM12RcW2uzeujZ2s4J8X3utZmy7BJgJXssJ"
+	privateAddress     = "EQCp5UpUBZIbdold9sqUeU-1gFAF_8Mk-QQKIEXgbFtat8Um"
+	stonfiAddress      = "EQB3ncyBUTjZUA5EnFKR5_EnOMI9V1tTEAAPaiU71gc4TiUt"
+	pTonStonfiAddress  = "EQARULUYsmJq1RiZ-YiH-IJLcAZUVkVff-KBPwEmmaQGH6aC"
 	aPineStonfiAddress = "nil"
-	dedustVaultNative   = "EQDa4VOnTYlLvDJ0gZjNYm5PXfSmmtL6Vs6A_CZEtXCNICq_"
-	dedustVaultJetton   = "nil"
-	dedustPoolAddress   = "nil"
+	dedustVaultNative  = "EQDa4VOnTYlLvDJ0gZjNYm5PXfSmmtL6Vs6A_CZEtXCNICq_"
+	dedustVaultJetton  = "nil"
+	dedustPoolAddress  = "nil"
 )
 
 type Message struct {
