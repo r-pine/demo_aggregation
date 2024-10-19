@@ -29,10 +29,10 @@ const (
 	privateAddress      = "EQCp5UpUBZIbdold9sqUeU-1gFAF_8Mk-QQKIEXgbFtat8Um"
 	stonfiAddress       = "EQB3ncyBUTjZUA5EnFKR5_EnOMI9V1tTEAAPaiU71gc4TiUt"
 	pTonStonfiAddress   = "EQARULUYsmJq1RiZ-YiH-IJLcAZUVkVff-KBPwEmmaQGH6aC"
-	aPineStonfiAddress = "nil"
+	aPineStonfiAddress  = "EQCqU71ESTAIL9HRBf-UZEa-4ED3m7MB1JIznAz39h5pwnbo"
 	dedustVaultNative   = "EQDa4VOnTYlLvDJ0gZjNYm5PXfSmmtL6Vs6A_CZEtXCNICq_"
-	dedustVaultJetton   = "nil"
-	dedustPoolAddress   = "nil"
+	dedustVaultAPine    = "EQDamGXCPYxbxLsdXFaKJoZ7VYHRIIyxhka8GOLwHJC1l_LZ"
+	dedustPoolAddress   = "EQC0neK6srf_hVHiJbdqqTHT8zbH-CWbBlJSbybP4TkdG6hG"
 )
 
 type Message struct {
