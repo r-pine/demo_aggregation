@@ -143,7 +143,9 @@ func (c *Controller) GetSwapPayload(ctx *gin.Context) {
 			dedustMessage := buildDedustTonToJettonBody(
 				dedustAmountIn,
 				nil,
-				&utils.SwapStep{},
+				&utils.SwapStep{
+					PoolAddress: dedustPoolAddress,
+				},
 				&utils.SwapParams{},
 			)
 			msgs = append(msgs, dedustMessage)
@@ -175,7 +177,9 @@ func (c *Controller) GetSwapPayload(ctx *gin.Context) {
 				dedustAmountIn,
 				br.Address,
 				nil,
-				&utils.SwapStep{},
+				&utils.SwapStep{
+					PoolAddress: dedustPoolAddress,
+				},
 				&utils.SwapParams{},
 				userJettonAddress,
 			)
@@ -261,7 +265,7 @@ func buildPrivateJettonToTonBody(
 func buildStonfiTonToJettonBody(stonfiAmountIn float64, userAddr string, refAddr *string) Message {
 	fwdPayload := cell.BeginCell().
 		MustStoreUInt(0x25938561, 32).
-		MustStoreAddr(address.MustParseRawAddr(aPineStonfiAddress)).
+		MustStoreAddr(address.MustParseAddr(aPineStonfiAddress)).
 		MustStoreBigCoins(big.NewInt(1)).
 		MustStoreAddr(address.MustParseRawAddr(userAddr)).
 		MustStoreBoolBit(refAddr != nil)
@@ -277,7 +281,7 @@ func buildStonfiTonToJettonBody(stonfiAmountIn float64, userAddr string, refAddr
 		MustStoreUInt(uint64(time.Now().Unix()), 64).
 		MustStoreBigCoins(big.NewInt(int64(stonfiAmountIn))).
 		MustStoreAddr(address.MustParseAddr(stonfiAddress)).
-		MustStoreAddr(address.MustParseAddr(userAddr)).
+		MustStoreAddr(address.MustParseRawAddr(userAddr)).
 		MustStoreBoolBit(false).
 		MustStoreBigCoins(big.NewInt(int64(fwdAmount))).
 		MustStoreBoolBit(true).
@@ -299,7 +303,7 @@ func buildStonfiJettonToTonBody(
 ) Message {
 	fwdPayload := cell.BeginCell().
 		MustStoreUInt(0x25938561, 32).
-		MustStoreAddr(address.MustParseRawAddr(pTonStonfiAddress)).
+		MustStoreAddr(address.MustParseAddr(pTonStonfiAddress)).
 		MustStoreBigCoins(big.NewInt(1)).
 		MustStoreAddr(address.MustParseRawAddr(userAddr)).
 		MustStoreBoolBit(refAddr != nil)
@@ -315,7 +319,7 @@ func buildStonfiJettonToTonBody(
 		MustStoreUInt(uint64(time.Now().Unix()), 64).
 		MustStoreBigCoins(big.NewInt(int64(stonfiAmountIn))).
 		MustStoreAddr(address.MustParseAddr(stonfiAddress)).
-		MustStoreAddr(address.MustParseAddr(userAddr)).
+		MustStoreAddr(address.MustParseRawAddr(userAddr)).
 		MustStoreBoolBit(false).
 		MustStoreBigCoins(big.NewInt(int64(fwdAmount))).
 		MustStoreBoolBit(true).
