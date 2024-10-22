@@ -25,9 +25,9 @@ const (
 	configUrl  = "https://ton-blockchain.github.io/testnet-global.config.json"
 
 	aPineMaster        = "EQAjWFZaH0Xib0VGEwe3148Hg7arST5mhJwDB3YTIS0OFUxJ"
-	pTonPrivateAddress = "EQABxQiQSPSCFMM12RcW2uzeujZ2s4J8X3utZmy7BJgJXssJ"
+	pTonPrivateAddress = "EQCzGHwSIX6VM_PCBWUNm-d_hS5JuO46UNGtCjJcxSb2mMx7"
 	privateAddress     = "EQBB9cr9pFiGmAQ9vpAGNdWpaDiuw88kLdxipDNKgJzdWw91"
-	stonfiAddress      = "EQD40Uooo8XiU4v58X26ShDf93R3w0Fu4d0VXLUShzFerTav"
+	stonfiAddress      = "EQB3ncyBUTjZUA5EnFKR5_EnOMI9V1tTEAAPaiU71gc4TiUt"
 	pTonStonfiAddress  = "EQARULUYsmJq1RiZ-YiH-IJLcAZUVkVff-KBPwEmmaQGH6aC"
 	aPineStonfiAddress = "EQCqU71ESTAIL9HRBf-UZEa-4ED3m7MB1JIznAz39h5pwnbo"
 	dedustVaultNative  = "EQDa4VOnTYlLvDJ0gZjNYm5PXfSmmtL6Vs6A_CZEtXCNICq_"
@@ -80,6 +80,9 @@ func (c *Controller) GetSwapPayload(ctx *gin.Context) {
 		return
 	}
 	dedustAmountIn, privateAmountIn, stonfiAmountIn, bestOutput := blockchain.Swap(amountToFloat, *res, swapTonToApine)
+	dedustAmountIn = 33333 * blockchain.NanoUnit
+	privateAmountIn = 33333 * blockchain.NanoUnit
+	stonfiAmountIn = 33333 * blockchain.NanoUnit
 
 	client := liteclient.NewConnectionPool()
 
@@ -288,7 +291,7 @@ func buildStonfiJettonToTonBody(
 		EndCell()
 
 	return Message{
-		AmountTon:  tlb.MustFromTON(strconv.FormatFloat(fwdAmount+0.05*blockchain.NanoUnit, 'f', 6, 64)).String(),
+		AmountTon:  tlb.MustFromTON(strconv.FormatFloat(fwdAmount+(0.05*blockchain.NanoUnit), 'f', 6, 64)).String(),
 		DstAddress: userJettonWalletAddress.Bounce(true).String(),
 		Payload:    base64.StdEncoding.EncodeToString(body.ToBOC()),
 	}
