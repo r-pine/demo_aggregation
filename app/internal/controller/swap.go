@@ -80,9 +80,6 @@ func (c *Controller) GetSwapPayload(ctx *gin.Context) {
 		return
 	}
 	dedustAmountIn, privateAmountIn, stonfiAmountIn, bestOutput := blockchain.Swap(amountToFloat, *res, swapTonToApine)
-	dedustAmountIn = 33333 * blockchain.NanoUnit
-	privateAmountIn = 33333 * blockchain.NanoUnit
-	stonfiAmountIn = 33333 * blockchain.NanoUnit
 
 	client := liteclient.NewConnectionPool()
 
