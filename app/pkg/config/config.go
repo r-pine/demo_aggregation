@@ -16,6 +16,9 @@ type Config struct {
 		LiteserverPineType string `env:"LITESERVER_PINE_TYPE"`
 		LiteserverPineKey  string `env:"LITESERVER_PINE_KEY"`
 		Delay              int    `env:"DELAY"`
+		StonfiPoolAddress  string `env:"STONFI_POOL_ADDRESS"`
+		DedustPoolAddress  string `env:"DEDUST_POOL_ADDRESS"`
+		PrivatePoolAddress string `env:"PRIVATE_POOL_ADDRESS"`
 	}
 	Redis struct {
 		Host     string `env:"REDIS_HOST"`

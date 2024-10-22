@@ -2,6 +2,7 @@ package controller
 
 import (
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"math/big"
 	"net/http"
@@ -26,8 +27,8 @@ const (
 
 	aPineMaster        = "EQAjWFZaH0Xib0VGEwe3148Hg7arST5mhJwDB3YTIS0OFUxJ"
 	pTonPrivateAddress = "EQABxQiQSPSCFMM12RcW2uzeujZ2s4J8X3utZmy7BJgJXssJ"
-	privateAddress     = "EQCp5UpUBZIbdold9sqUeU-1gFAF_8Mk-QQKIEXgbFtat8Um"
-	stonfiAddress      = "EQB3ncyBUTjZUA5EnFKR5_EnOMI9V1tTEAAPaiU71gc4TiUt"
+	privateAddress     = "EQBB9cr9pFiGmAQ9vpAGNdWpaDiuw88kLdxipDNKgJzdWw91"
+	stonfiAddress      = "EQD40Uooo8XiU4v58X26ShDf93R3w0Fu4d0VXLUShzFerTav"
 	pTonStonfiAddress  = "EQARULUYsmJq1RiZ-YiH-IJLcAZUVkVff-KBPwEmmaQGH6aC"
 	aPineStonfiAddress = "EQCqU71ESTAIL9HRBf-UZEa-4ED3m7MB1JIznAz39h5pwnbo"
 	dedustVaultNative  = "EQDa4VOnTYlLvDJ0gZjNYm5PXfSmmtL6Vs6A_CZEtXCNICq_"
@@ -58,41 +59,16 @@ func (c *Controller) GetSwapPayload(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, c.getErrorResponse())
 		return
 	}
-
-	// Замените эту часть на получение данных из вашего источника
-	res := entity.Aggregation{
-		Dex: map[string]entity.Platform{
-			"stonfi": {
-				Name:     "stonfi",
-				Reserve0: 209600000000,
-				Reserve1: 6374046920634660,
-				Fee:      30,
-			},
-			"dedust": {
-				Name:     "dedust",
-				Reserve0: 209600000000,
-				Reserve1: 6374046920634660,
-				Fee:      25,
-			},
-			"private": {
-				Name:     "private",
-				Reserve0: 209600000000,
-				Reserve1: 6374046920634660,
-				Fee:      20,
-			},
-		},
+	data, err := c.sc.Get("states")
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		return
 	}
-
-	// data, err := c.sc.Get("states")
-	// if err != nil {
-	// 	ctx.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
-	// 	return
-	// }
-	// var res *entity.Aggregation
-	// if err := json.Unmarshal([]byte(data), &res); err != nil {
-	// 	ctx.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
-	// 	return
-	// }
+	var res *entity.Aggregation
+	if err := json.Unmarshal([]byte(data), &res); err != nil {
+		ctx.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
+		return
+	}
 
 	swapTonToApine := true
 	if br.Direction == aPineToTon {
@@ -104,10 +80,7 @@ func (c *Controller) GetSwapPayload(ctx *gin.Context) {
 		ctx.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 		return
 	}
-	_, privateAmountIn, stonfiAmountIn, dedustAmountIn, bestOutput := blockchain.Swap(amountToFloat, res, swapTonToApine)
-	fmt.Println("privateAmountIn", privateAmountIn)
-	fmt.Println("stonfiAmountIn", stonfiAmountIn)
-	fmt.Println("dedustAmountIn", dedustAmountIn)
+	dedustAmountIn, privateAmountIn, stonfiAmountIn, bestOutput := blockchain.Swap(amountToFloat, *res, swapTonToApine)
 
 	client := liteclient.NewConnectionPool()
 
@@ -131,25 +104,25 @@ func (c *Controller) GetSwapPayload(ctx *gin.Context) {
 
 	var msgs []Message
 	if swapTonToApine {
-		if privateAmountIn > 0 {
-			privateMessage := buildPrivateTonToJettonBody(privateAmountIn, br.Address, nil)
-			msgs = append(msgs, privateMessage)
-		}
+		// if privateAmountIn > 0 {
+		// 	privateMessage := buildPrivateTonToJettonBody(privateAmountIn, br.Address, nil)
+		// 	msgs = append(msgs, privateMessage)
+		// }
 		if stonfiAmountIn > 0 {
 			stonfiMessage := buildStonfiTonToJettonBody(stonfiAmountIn, br.Address, nil)
 			msgs = append(msgs, stonfiMessage)
 		}
-		if dedustAmountIn > 0 {
-			dedustMessage := buildDedustTonToJettonBody(
-				dedustAmountIn,
-				nil,
-				&utils.SwapStep{
-					PoolAddress: dedustPoolAddress,
-				},
-				&utils.SwapParams{},
-			)
-			msgs = append(msgs, dedustMessage)
-		}
+		// if dedustAmountIn > 0 {
+		// 	dedustMessage := buildDedustTonToJettonBody(
+		// 		dedustAmountIn,
+		// 		nil,
+		// 		&utils.SwapStep{
+		// 			PoolAddress: dedustPoolAddress,
+		// 		},
+		// 		&utils.SwapParams{},
+		// 	)
+		// 	msgs = append(msgs, dedustMessage)
+		// }
 
 		ctx.JSON(
 			http.StatusOK,

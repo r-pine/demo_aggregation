@@ -46,9 +46,9 @@ const (
 
 func (a *Aggregation) Run() {
 	contracts := map[string]string{
-		"stonfi":  "EQCcD96ywHvlXBjuf4ihiGyH66QChHesNyoJSQ6WKKqob3Lh",
-		"private": "EQCcD96ywHvlXBjuf4ihiGyH66QChHesNyoJSQ6WKKqob3Lh",
-		"dedust":  "EQBPo45inIbFXiUt8I8xrakPRB1aXZ-wzNOJfIhfQgd2rJ-z",
+		"stonfi":  a.cfg.AppConfig.StonfiPoolAddress,
+		"private": a.cfg.AppConfig.PrivatePoolAddress,
+		"dedust":  a.cfg.AppConfig.DedustPoolAddress,
 	}
 	for {
 		aggrs := map[string]entity.Platform{}
@@ -121,7 +121,7 @@ func (a *Aggregation) getAccountData(
 
 	switch contractName {
 	case "stonfi":
-		fee, reserve0, reserve1 = a.getFeeAndReservesStonFi(res)
+		fee, reserve1, reserve0 = a.getFeeAndReservesStonFi(res)
 	case "dedust":
 		reserve0, reserve1, err = a.getReservesDedust(
 			api, b, contractAddress,
@@ -135,9 +135,7 @@ func (a *Aggregation) getAccountData(
 			return nil, err
 		}
 	case "private":
-		// TODO:
-		// fee, reserve0, reserve1 = a.getFeeAndReservesPrivate(res)
-		fee, reserve0, reserve1 = a.getFeeAndReservesStonFi(res)
+		fee, reserve0, reserve1 = a.getFeeAndReservesPrivate(res)
 	}
 
 	pl := entity.Platform{
@@ -172,7 +170,7 @@ func (a *Aggregation) getAccountData(
 // storage::protocol_fee_address = ds_0~load_msg_addr();
 // storage::reserve0 = ds_0~load_coins();
 // storage::reserve1 = ds_0~load_coins();
-func (a *Aggregation) getFeeAndReservesPrivate(res *tlb.Account) (int64, int64, int64) {
+func (a *Aggregation) getFeeAndReservesPrivate(res *tlb.Account) (int, int64, int64) {
 	if res.Data != nil {
 		slice := res.Data.BeginParse()
 		_ = slice.MustLoadInt(1)
@@ -191,7 +189,7 @@ func (a *Aggregation) getFeeAndReservesPrivate(res *tlb.Account) (int64, int64, 
 		reserve0 := ref.MustLoadBigCoins().Int64()
 		reserve1 := ref.MustLoadBigCoins().Int64()
 		fee := lpFee + protocolFee
-		return int64(fee), reserve0, reserve1
+		return int(fee), reserve0, reserve1
 	}
 	return 0, 0, 0
 }
