@@ -8,11 +8,6 @@ import (
 	"github.com/r-pine/demo_aggregation/app/internal/entity"
 )
 
-const (
-	NanoUnit   = 1000000000.0
-	NetworkFee = 0.12 * NanoUnit
-)
-
 func calculateDy(dx, reserveIn, reserveOut float64, fee float64) float64 {
 	feeFraction := fee / 10000.0
 	dxWithFee := dx * (1 - feeFraction)

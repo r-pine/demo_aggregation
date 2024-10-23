@@ -13,16 +13,13 @@ import (
 	"github.com/r-pine/demo_aggregation/app/internal/blockchain"
 	"github.com/r-pine/demo_aggregation/app/internal/entity"
 	"github.com/xssnick/tonutils-go/address"
-	"github.com/xssnick/tonutils-go/liteclient"
 	"github.com/xssnick/tonutils-go/tlb"
-	"github.com/xssnick/tonutils-go/ton"
 	"github.com/xssnick/tonutils-go/ton/jetton"
 	"github.com/xssnick/tonutils-go/tvm/cell"
 )
 
 const (
 	aPineToTon = "APINE_TO_TON"
-	configUrl  = "https://ton-blockchain.github.io/testnet-global.config.json"
 
 	aPineMaster        = "EQAjWFZaH0Xib0VGEwe3148Hg7arST5mhJwDB3YTIS0OFUxJ"
 	pTonPrivateAddress = "EQCzGHwSIX6VM_PCBWUNm-d_hS5JuO46UNGtCjJcxSb2mMx7"
@@ -81,14 +78,11 @@ func (c *Controller) GetSwapPayload(ctx *gin.Context) {
 	}
 	dedustAmountIn, privateAmountIn, stonfiAmountIn, bestOutput := blockchain.Swap(amountToFloat, *res, swapTonToApine)
 
-	client := liteclient.NewConnectionPool()
-
-	err = client.AddConnectionsFromConfigUrl(ctx, configUrl)
+	api, err := blockchain.GetApiClient(ctx)
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
 		return
 	}
-	api := ton.NewAPIClient(client)
 
 	tokenContract := address.MustParseAddr(aPineMaster)
 	master := jetton.NewJettonMasterClient(api, tokenContract)
