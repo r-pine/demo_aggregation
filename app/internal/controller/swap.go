@@ -4,25 +4,15 @@ import (
 	"encoding/json"
 	"net/http"
 	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/r-pine/demo_aggregation/app/internal/blockchain"
 	"github.com/r-pine/demo_aggregation/app/internal/entity"
+	"github.com/xssnick/tonutils-go/address"
 )
 
-const (
-	aPineToTon = "APINE_TO_TON"
-
-	aPineMaster        = "EQAjWFZaH0Xib0VGEwe3148Hg7arST5mhJwDB3YTIS0OFUxJ"
-	pTonPrivateAddress = "EQCzGHwSIX6VM_PCBWUNm-d_hS5JuO46UNGtCjJcxSb2mMx7"
-	privateAddress     = "EQBB9cr9pFiGmAQ9vpAGNdWpaDiuw88kLdxipDNKgJzdWw91"
-	stonfiAddress      = "EQB3ncyBUTjZUA5EnFKR5_EnOMI9V1tTEAAPaiU71gc4TiUt"
-	pTonStonfiAddress  = "EQARULUYsmJq1RiZ-YiH-IJLcAZUVkVff-KBPwEmmaQGH6aC"
-	aPineStonfiAddress = "EQCqU71ESTAIL9HRBf-UZEa-4ED3m7MB1JIznAz39h5pwnbo"
-	dedustVaultNative  = "EQDa4VOnTYlLvDJ0gZjNYm5PXfSmmtL6Vs6A_CZEtXCNICq_"
-	dedustVaultAPine   = "EQDamGXCPYxbxLsdXFaKJoZ7VYHRIIyxhka8GOLwHJC1l_LZ"
-	dedustPoolAddress  = "EQC0neK6srf_hVHiJbdqqTHT8zbH-CWbBlJSbybP4TkdG6hG"
-)
+const aPineToTon = "APINE_TO_TON"
 
 type BodyResponse struct {
 	Msgs                []blockchain.Message `json:"messages"`
@@ -73,11 +63,16 @@ func (c *Controller) GetSwapPayload(ctx *gin.Context) {
 		return
 	}
 
-	userJettonAddress, err := blockchain.GetUserJettonWalletAddress(ctx, api, br.Address)
-	if err != nil {
-		c.log.Error(err)
-		ctx.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
-		return
+	var userJettonAddress *address.Address
+	for {
+		userJettonAddress, err = blockchain.GetUserJettonWalletAddress(ctx, api, br.Address)
+		if err != nil || userJettonAddress == nil {
+			time.Sleep(1 * time.Second)
+			c.log.Error(err)
+			continue
+		} else {
+			break
+		}
 	}
 
 	msgs := blockchain.BuildMessageSwap(
