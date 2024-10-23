@@ -25,7 +25,7 @@ func Swap(
 
 	bestReward := 0.0
 
-	for i := 0; i < 2000000; i++ { // Количество итераций
+	for i := 0; i < 2000000; i++ {
 		pX1 := rand.Intn(2001)
 		x1 := float64(pX1) * inputAmount / 2000
 		if x1 < 0 {
@@ -51,25 +51,19 @@ func Swap(
 		numUsedPools := 0
 		totalReward := 0.0
 		if tonToAPine {
-			// Обработка первого пула (stonfi)
 			if x1 > 0 {
-				// x1 += NetworkFee
 				dy := calculateDy(x1, aggregation.Dex["dedust"].Reserve0, aggregation.Dex["dedust"].Reserve1, aggregation.Dex["dedust"].Fee)
 				totalReward += dy
 				numUsedPools++
 			}
 
-			// Обработка второго пула (dedust)
 			if x2 > 0 {
-				// x2 += NetworkFee
 				dy := calculateDy(x2, aggregation.Dex["private"].Reserve0, aggregation.Dex["private"].Reserve1, aggregation.Dex["private"].Fee)
 				totalReward += dy
 				numUsedPools++
 			}
 
-			// Обработка третьего пула (private)
 			if x3 > 0 {
-				// x3 += NetworkFee
 				dy := calculateDy(x3, aggregation.Dex["stonfi"].Reserve0, aggregation.Dex["stonfi"].Reserve1, aggregation.Dex["stonfi"].Fee)
 				totalReward += dy
 				numUsedPools++
