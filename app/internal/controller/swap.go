@@ -67,8 +67,8 @@ func (c *Controller) GetSwapPayload(ctx *gin.Context) {
 	for {
 		userJettonAddress, err = blockchain.GetUserJettonWalletAddress(ctx, api, br.Address)
 		if err != nil || userJettonAddress == nil {
-			time.Sleep(1 * time.Second)
 			c.log.Error(err)
+			time.Sleep(1 * time.Second)
 			continue
 		} else {
 			break
