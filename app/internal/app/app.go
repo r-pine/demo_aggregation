@@ -40,7 +40,7 @@ func RunApplication() {
 	service := sc.NewService(ctx, storage)
 	log.Infoln("Connect service successfully!")
 
-	aggregation := blockchain.NewAggregation(ctx, *cfg, log, service)
+	aggregation := blockchain.NewAggregation(*cfg, log, service)
 	log.Infoln("Connect aggregation successfully!")
 
 	gin.SetMode(cfg.AppConfig.GinMode)
@@ -49,7 +49,7 @@ func RunApplication() {
 	handlers := httpController.InitRoutes(ginRouter)
 	log.Infoln("Connect handlers successfully!")
 
-	go aggregation.Run()
+	go aggregation.Run(ctx)
 
 	server.RunServer(log, handlers, cfg.AppConfig.HttpAddr)
 }

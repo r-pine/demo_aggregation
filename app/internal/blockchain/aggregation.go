@@ -19,27 +19,24 @@ import (
 )
 
 type Aggregation struct {
-	ctx     context.Context
 	cfg     config.Config
 	log     logging.Logger
 	service *sc.Service
 }
 
 func NewAggregation(
-	ctx context.Context,
 	cfg config.Config,
 	log logging.Logger,
 	service *sc.Service,
 ) *Aggregation {
 	return &Aggregation{
-		ctx:     ctx,
 		cfg:     cfg,
 		log:     log,
 		service: service,
 	}
 }
 
-func (a *Aggregation) Run() {
+func (a *Aggregation) Run(ctx context.Context) {
 	contracts := map[string]string{
 		"stonfi":  a.cfg.AppConfig.StonfiPoolAddress,
 		"private": a.cfg.AppConfig.PrivatePoolAddress,
@@ -48,7 +45,7 @@ func (a *Aggregation) Run() {
 	for {
 		aggrs := map[string]entity.Platform{}
 		for k, v := range contracts {
-			aggr, err := a.getAccountData(k, v)
+			aggr, err := a.getAccountData(ctx, k, v)
 			if err != nil {
 				a.log.Errorln(err)
 				continue
@@ -69,15 +66,16 @@ func (a *Aggregation) Run() {
 }
 
 func (a *Aggregation) getAccountData(
+	ctx context.Context,
 	contractName, contractAddress string,
 ) (*entity.Platform, error) {
 
-	api, client, err := GetApiClient(a.ctx)
+	api, client, err := GetApiClient(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	ctx := client.StickyContext(a.ctx)
+	ctx = client.StickyContext(ctx)
 
 	b, err := api.CurrentMasterchainInfo(ctx)
 	if err != nil {
@@ -102,13 +100,13 @@ func (a *Aggregation) getAccountData(
 		fee, reserve1, reserve0 = a.getFeeAndReservesStonFi(res)
 	case "dedust":
 		reserve0, reserve1, err = a.getReservesDedust(
-			api, b, contractAddress,
+			ctx, api, b, contractAddress,
 		)
 		if err != nil {
 			return nil, err
 		}
 
-		fee, err = a.getFeesDedust(api, b, contractAddress)
+		fee, err = a.getFeesDedust(ctx, api, b, contractAddress)
 		if err != nil {
 			return nil, err
 		}
@@ -206,12 +204,13 @@ func (a *Aggregation) getFeeAndReservesStonFi(res *tlb.Account) (int, int64, int
 }
 
 func (a *Aggregation) getFeesDedust(
+	ctx context.Context,
 	api ton.APIClientWrapped,
 	b *ton.BlockIDExt,
 	contractAddress string,
 ) (int, error) {
 	result, err := api.RunGetMethod(
-		a.ctx, b, address.MustParseAddr(contractAddress), "get_trade_fee",
+		ctx, b, address.MustParseAddr(contractAddress), "get_trade_fee",
 	)
 	if err != nil {
 		return 0, errors.New("run get_trade_fee method err:" + err.Error())
@@ -230,12 +229,13 @@ func (a *Aggregation) getFeesDedust(
 }
 
 func (a *Aggregation) getReservesDedust(
+	ctx context.Context,
 	api ton.APIClientWrapped,
 	b *ton.BlockIDExt,
 	contractAddress string,
 ) (int64, int64, error) {
 	result, err := api.RunGetMethod(
-		a.ctx, b, address.MustParseAddr(contractAddress), "get_reserves",
+		ctx, b, address.MustParseAddr(contractAddress), "get_reserves",
 	)
 	if err != nil {
 		return 0, 0, errors.New("run get_reserves method err")
