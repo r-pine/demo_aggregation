@@ -72,19 +72,21 @@ func (a *Aggregation) getAccountData(
 	contractName, contractAddress string,
 ) (*entity.Platform, error) {
 
-	api, _, err := GetApiClient(a.ctx)
+	api, client, err := GetApiClient(a.ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	b, err := api.CurrentMasterchainInfo(a.ctx)
+	ctx := client.StickyContext(a.ctx)
+
+	b, err := api.CurrentMasterchainInfo(ctx)
 	if err != nil {
 		return nil, err
 	}
 
 	addr := address.MustParseAddr(contractAddress)
 
-	res, err := api.WaitForBlock(b.SeqNo).GetAccount(a.ctx, b, addr)
+	res, err := api.WaitForBlock(b.SeqNo).GetAccount(ctx, b, addr)
 	if err != nil {
 		return nil, err
 	}
