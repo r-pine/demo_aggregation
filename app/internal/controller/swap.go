@@ -56,7 +56,7 @@ func (c *Controller) GetSwapPayload(ctx *gin.Context) {
 	}
 	stonfiAmountIn, dedustAmountIn, privateAmountIn, bestOutput := blockchain.Swap(amountToFloat, *res, swapTonToApine)
 
-	api, err := blockchain.GetApiClient(ctx)
+	api, _, err := blockchain.GetApiClient(ctx)
 	if err != nil {
 		c.log.Error(err)
 		ctx.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})

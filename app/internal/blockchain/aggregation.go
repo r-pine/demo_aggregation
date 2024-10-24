@@ -14,7 +14,6 @@ import (
 	"github.com/r-pine/demo_aggregation/app/pkg/config"
 	"github.com/r-pine/demo_aggregation/app/pkg/logging"
 	"github.com/xssnick/tonutils-go/address"
-	"github.com/xssnick/tonutils-go/liteclient"
 	"github.com/xssnick/tonutils-go/tlb"
 	"github.com/xssnick/tonutils-go/ton"
 )
@@ -39,10 +38,6 @@ func NewAggregation(
 		service: service,
 	}
 }
-
-const (
-	liteserverUrl = "https://ton.org/global.config.json"
-)
 
 func (a *Aggregation) Run() {
 	contracts := map[string]string{
@@ -77,38 +72,19 @@ func (a *Aggregation) getAccountData(
 	contractName, contractAddress string,
 ) (*entity.Platform, error) {
 
-	cfg, err := liteclient.GetConfigFromUrl(a.ctx, liteserverUrl)
+	api, _, err := GetApiClient(a.ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	cfg.Liteservers = append(cfg.Liteservers, liteclient.LiteserverConfig{
-		IP:   a.cfg.AppConfig.LiteserverPineIP,
-		Port: a.cfg.AppConfig.LiteserverPinePort,
-		ID: liteclient.ServerID{
-			Type: a.cfg.AppConfig.LiteserverPineType,
-			Key:  a.cfg.AppConfig.LiteserverPineKey,
-		},
-	})
-
-	client := liteclient.NewConnectionPool()
-
-	err = client.AddConnectionsFromConfig(a.ctx, cfg)
-	if err != nil {
-		return nil, err
-	}
-	api := ton.NewAPIClient(client, ton.ProofCheckPolicyFast).WithRetry()
-
-	ctx := client.StickyContext(a.ctx)
-
-	b, err := api.CurrentMasterchainInfo(ctx)
+	b, err := api.CurrentMasterchainInfo(a.ctx)
 	if err != nil {
 		return nil, err
 	}
 
 	addr := address.MustParseAddr(contractAddress)
 
-	res, err := api.WaitForBlock(b.SeqNo).GetAccount(ctx, b, addr)
+	res, err := api.WaitForBlock(b.SeqNo).GetAccount(a.ctx, b, addr)
 	if err != nil {
 		return nil, err
 	}

@@ -6,3 +6,4 @@
 .docker-volumes
 venv
 build/main
+global.config.json

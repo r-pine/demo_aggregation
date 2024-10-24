@@ -7,13 +7,12 @@ import (
 	"github.com/xssnick/tonutils-go/ton"
 )
 
-func GetApiClient(ctx context.Context) (*ton.APIClient, error) {
+func GetApiClient(ctx context.Context) (*ton.APIClient, *liteclient.ConnectionPool, error) {
 	client := liteclient.NewConnectionPool()
-
-	err := client.AddConnectionsFromConfigUrl(ctx, configBlockchainUrl)
+	err := client.AddConnectionsFromConfigFile(configBlockchainUrl)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	api := ton.NewAPIClient(client)
-	return api, nil
+	return api, client, nil
 }

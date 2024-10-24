@@ -3,7 +3,7 @@ package blockchain
 const (
 	NanoUnit            = 1000000000.0
 	NetworkFee          = 0.12 * NanoUnit
-	configBlockchainUrl = "https://ton-blockchain.github.io/global.config.json"
+	configBlockchainUrl = "/app/global.config.json"
 
 	aPineMaster        = "EQAjWFZaH0Xib0VGEwe3148Hg7arST5mhJwDB3YTIS0OFUxJ"
 	pTonPrivateAddress = "EQCzGHwSIX6VM_PCBWUNm-d_hS5JuO46UNGtCjJcxSb2mMx7"

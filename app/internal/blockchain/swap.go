@@ -27,7 +27,7 @@ func Swap(
 
 	for i := 0; i < 2000000; i++ {
 		pX1 := rand.Intn(precision)
-		x1 := float64(pX1) * amountToFloat / precision
+		x1 := float64(pX1) * inputAmount / precision
 		if pX1 < 3 {
 			x1 = 0
 			pX1 = 0
@@ -35,7 +35,7 @@ func Swap(
 
 		pX2 := rand.Intn(precision - pX1)
 
-		x2 := float64(pX2) * amountToFloat / precision
+		x2 := float64(pX2) * inputAmount / precision
 		if pX2 < 3 {
 			x2 = 0
 			pX2 = 0
@@ -43,7 +43,7 @@ func Swap(
 
 		pX3 := precision - pX1 - pX2
 
-		x3 := float64(pX3) * amountToFloat / precision
+		x3 := float64(pX3) * inputAmount / precision
 		if pX3 < 3 {
 			if x2 == 0 {
 				x1 += x3
@@ -75,10 +75,10 @@ func Swap(
 				numUsedPools++
 			}
 
-			if getTotalSwapValue(tonToAPine, amountToFloat, totalReward, float64(netComs*numUsedPools)) > bestSwapValue {
+			if getTotalSwapValue(tonToAPine, inputAmount, totalReward, float64(netComs*numUsedPools)) > bestSwapValue {
 
 				bestReward = totalReward
-				bestSwapValue = getTotalSwapValue(tonToAPine, amountToFloat, totalReward, float64(netComs*numUsedPools))
+				bestSwapValue = getTotalSwapValue(tonToAPine, inputAmount, totalReward, float64(netComs*numUsedPools))
 				bestX1 = x1
 				bestX2 = x2
 				bestX3 = x3
@@ -102,9 +102,9 @@ func Swap(
 				numUsedPools++
 			}
 
-			if getTotalSwapValue(tonToAPine, amountToFloat, totalReward, float64(netComs*numUsedPools)) > bestSwapValue {
+			if getTotalSwapValue(tonToAPine, inputAmount, totalReward, float64(netComs*numUsedPools)) > bestSwapValue {
 				bestReward = totalReward
-				bestSwapValue = getTotalSwapValue(tonToAPine, amountToFloat, totalReward, float64(netComs*numUsedPools))
+				bestSwapValue = getTotalSwapValue(tonToAPine, inputAmount, totalReward, float64(netComs*numUsedPools))
 				bestX1 = x1
 				bestX2 = x2
 				bestX3 = x3
