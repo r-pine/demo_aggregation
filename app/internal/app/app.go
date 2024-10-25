@@ -2,6 +2,7 @@ package app
 
 import (
 	"context"
+	"net/http"
 
 	"github.com/gin-gonic/gin"
 	"github.com/r-pine/demo_aggregation/app/internal/blockchain"
@@ -11,7 +12,7 @@ import (
 	st "github.com/r-pine/demo_aggregation/app/internal/storage"
 	"github.com/r-pine/demo_aggregation/app/pkg/config"
 	"github.com/r-pine/demo_aggregation/app/pkg/logging"
-	"github.com/r-pine/demo_aggregation/app/pkg/server"
+	"golang.org/x/sync/errgroup"
 )
 
 func RunApplication() {
@@ -24,8 +25,8 @@ func RunApplication() {
 	cfg := config.GetConfig()
 	log.Infoln("Connect config successfully!")
 
-	// Init Context
-	ctx := context.Background()
+	g, ctx := errgroup.WithContext(context.Background())
+
 	rcClient := redis.NewRedisClient(ctx, cfg, log)
 	rc, err := rcClient.ConnectToRedis()
 	if err != nil {
@@ -49,7 +50,23 @@ func RunApplication() {
 	handlers := httpController.InitRoutes(ginRouter)
 	log.Infoln("Connect handlers successfully!")
 
-	go aggregation.Run(ctx)
+	// go aggregation.Run(ctx)
 
-	server.RunServer(log, handlers, cfg.AppConfig.HttpAddr)
+	g.Go(func() (err error) {
+		aggregation.Run(ctx)
+		return nil
+	})
+
+	g.Go(func() (err error) {
+		return http.ListenAndServe(
+			cfg.AppConfig.HttpAddr,
+			handlers,
+		)
+	})
+
+	err = g.Wait()
+	if err != nil {
+		panic(err)
+	}
+	// server.RunServer(log, handlers, cfg.AppConfig.HttpAddr)
 }
