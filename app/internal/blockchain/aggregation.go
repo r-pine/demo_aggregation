@@ -44,14 +44,24 @@ func (a *Aggregation) Run(ctx context.Context) {
 	}
 	for {
 		aggrs := map[string]entity.Platform{}
+
 		for k, v := range contracts {
 			aggr, err := a.getAccountData(ctx, k, v)
 			if err != nil {
 				a.log.Errorln(err)
-				continue
+				return
+			}
+			if aggr == nil {
+				return
 			}
 			aggrs[k] = *aggr
 		}
+		for k := range contracts {
+			if _, ok := aggrs[k]; !ok {
+				return
+			}
+		}
+
 		aggrsStr, err := a.aggregationsToJsonStr(&entity.Aggregation{Dex: aggrs})
 		if err != nil {
 			a.log.Errorln(err)
