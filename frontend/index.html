@@ -392,7 +392,8 @@
             buttonRootId: 'connectToWallet',
         });
 
-        let isTonToApine = true; 
+        let isTonToApine = true;
+        let amountInputTimeout;
         
         async function updateTonBalance() {
             if (tonConnectUI.connected) {
@@ -450,8 +451,12 @@
 
             const amount = parseFloat(tonAmountInput.value);
 
+            clearTimeout(amountInputTimeout);
+
             if (!isNaN(amount)) {
-                fetchPayloadForAmount(amount);
+                amountInputTimeout = setTimeout(() => {
+                    fetchPayloadForAmount(amount);
+                }, 500);
             }
         }
 
