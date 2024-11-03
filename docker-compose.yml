@@ -14,7 +14,6 @@ services:
     depends_on:
       - demo-aggregation
     volumes:
-      - ./frontend:/usr/share/nginx/html/
       - ./nginx-app/default.conf:/etc/nginx/conf.d/default.conf
 
   demo-aggregation:
