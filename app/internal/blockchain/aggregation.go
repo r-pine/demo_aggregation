@@ -140,22 +140,6 @@ func (a *Aggregation) getAccountData(
 	return &pl, nil
 }
 
-// storage::is_locked = ds~load_int(1);
-// storage::expires_at = ds~load_uint(32);
-// storage::admin_address = ds~load_msg_addr();
-// storage::lp_fee = ds~load_uint(8);
-// storage::protocol_fee = ds~load_uint(8);
-// storage::ref_fee = ds~load_uint(8);
-// storage::token0_address = ds~load_msg_addr();
-// storage::token1_address = ds~load_msg_addr();
-// storage::total_supply_lp = ds~load_coins();
-
-// cell dc_0 = ds~load_ref(); slice ds_0 = dc_0.begin_parse();
-// storage::collected_token0_protocol_fee = ds_0~load_coins();
-// storage::collected_token1_protocol_fee = ds_0~load_coins();
-// storage::protocol_fee_address = ds_0~load_msg_addr();
-// storage::reserve0 = ds_0~load_coins();
-// storage::reserve1 = ds_0~load_coins();
 func (a *Aggregation) getFeeAndReservesPrivate(res *tlb.Account) (int, int64, int64) {
 	if res.Data != nil {
 		slice := res.Data.BeginParse()
@@ -181,17 +165,6 @@ func (a *Aggregation) getFeeAndReservesPrivate(res *tlb.Account) (int, int64, in
 }
 
 func (a *Aggregation) getFeeAndReservesStonFi(res *tlb.Account) (int, int64, int64) {
-	// adminAddr := slice.MustLoadAddr()
-	// lpFee := slice.MustLoadUInt(8)
-	// protocolFee := slice.MustLoadUInt(8)
-	// refFee := slice.MustLoadUInt(8)
-	// token0 := slice.MustLoadAddr()
-	// token1 := slice.MustLoadAddr()
-	// totalSupply := slice.MustLoadBigCoins()
-	// ref := slice.MustLoadRef()
-	// collectedToken0ProtocolFee := ref.MustLoadBigCoins()
-	// collectedToken1ProtocolFee := ref.MustLoadBigCoins()
-	// protocolFeeAddress := ref.MustLoadAddr()
 	if res.Data != nil {
 		slice := res.Data.BeginParse()
 		_ = slice.MustLoadAddr()
@@ -230,11 +203,6 @@ func (a *Aggregation) getFeesDedust(
 	if err != nil {
 		return 0, errors.New("run ParseInt f1 err:" + err.Error())
 	}
-	// f2, err := strconv.ParseFloat(fmt.Sprintf("%v", fees[1]), 64)
-	// if err != nil {
-	// 	return 0, errors.New("run ParseInt f2 err:" + err.Error())
-	// }
-	// fee := f1 / f2
 	return int(fee), nil
 }
 

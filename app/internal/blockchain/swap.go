@@ -9,7 +9,7 @@ import (
 )
 
 const (
-	netComs   = 0.12 * 1_000_000_000
+	netComs   = 0.05 * 1_000_000_000
 	precision = 1000
 )
 
