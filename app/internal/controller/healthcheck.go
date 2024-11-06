@@ -4,12 +4,22 @@ import (
 	"net/http"
 
 	"github.com/gin-gonic/gin"
+	"github.com/r-pine/demo_aggregation/app/internal/blockchain"
 )
 
 func (c *Controller) Healthcheck(ctx *gin.Context) {
-	var obj struct {
-		Msg string `json:"msg"`
+	api, _, err := blockchain.GetApiClient(ctx)
+	if err != nil || api == nil {
+		c.log.Error(err)
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"status":  "fail",
+			"message": "Rpine Demo Aggregation failed to obtain blockchain API client",
+		})
+		return
 	}
-	obj.Msg = "Hello Rpine Demo Aggregation"
-	ctx.JSON(http.StatusOK, &obj)
+
+	ctx.JSON(http.StatusOK, gin.H{
+		"status":  "success",
+		"message": "Service Rpine Demo Aggregation is healthy",
+	})
 }
