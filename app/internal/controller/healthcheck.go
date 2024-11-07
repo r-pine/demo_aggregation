@@ -15,7 +15,7 @@ func (c *Controller) Healthcheck(ctx *gin.Context) {
 			"status":  "fail",
 			"message": "Rpine Demo Aggregation failed to obtain blockchain API client",
 		})
-		return
+		panic("Failed to obtain blockchain API client")
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
