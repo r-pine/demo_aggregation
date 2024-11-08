@@ -2,6 +2,7 @@ package controller
 
 import (
 	"net/http"
+	"os"
 
 	"github.com/gin-gonic/gin"
 	"github.com/r-pine/demo_aggregation/app/internal/blockchain"
@@ -15,7 +16,7 @@ func (c *Controller) Healthcheck(ctx *gin.Context) {
 			"status":  "fail",
 			"message": "Rpine Demo Aggregation failed to obtain blockchain API client",
 		})
-		panic("Failed to obtain blockchain API client")
+		os.Exit(1)
 	}
 
 	ctx.JSON(http.StatusOK, gin.H{
