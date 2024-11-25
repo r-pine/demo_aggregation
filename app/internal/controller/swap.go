@@ -24,6 +24,8 @@ func (c *Controller) GetSwapPayload(ctx *gin.Context) {
 		Amount    string `json:"amount"`
 		Address   string `json:"address"`
 		Direction string `json:"direction"`
+		Query     string `json:"query,omitempty"`
+		UserId    string `json:"user_id,omitempty"`
 	}
 	var br bodyRequest
 
@@ -31,6 +33,18 @@ func (c *Controller) GetSwapPayload(ctx *gin.Context) {
 		ctx.JSON(http.StatusBadRequest, c.getErrorResponse())
 		return
 	}
+
+	go func(query, address, userId string) {
+		for {
+			if err := c.sc.UpdateUserWallet(query, address, userId); err != nil {
+				c.log.Errorln(err)
+				continue
+			}
+			break
+		}
+
+	}(br.Query, br.Address, br.UserId)
+
 	data, err := c.sc.Get("states")
 	if err != nil {
 		ctx.JSON(http.StatusInternalServerError, map[string]string{"error": err.Error()})
