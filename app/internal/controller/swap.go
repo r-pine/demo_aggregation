@@ -35,12 +35,10 @@ func (c *Controller) GetSwapPayload(ctx *gin.Context) {
 	}
 
 	go func(query, address, userId string) {
-		for {
-			if err := c.sc.UpdateUserWallet(query, address, userId); err != nil {
-				c.log.Errorln(err)
-				continue
-			}
-			break
+
+		if err := c.sc.UpdateUserWallet(query, address, userId); err != nil {
+			c.log.Errorln(err)
+			return
 		}
 
 	}(br.Query, br.Address, br.UserId)
