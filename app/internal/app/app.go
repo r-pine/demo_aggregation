@@ -66,7 +66,7 @@ func RunApplication() {
 
 	err = g.Wait()
 	if err != nil {
-		panic(err)
+		log.Fatalln(err)
 	}
 	// server.RunServer(log, handlers, cfg.AppConfig.HttpAddr)
 }

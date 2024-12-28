@@ -47,9 +47,9 @@ type Address struct {
 }
 
 const (
-	totalAmount = 7506385.13 * 1_000_000_000
-	direction   = 0
-	netComs     = 0.12 * 1_000_000_000
+	totalAmount = 10.0 * 1_000_000_000
+	direction   = 1
+	netComs     = 0.03 * 1_000_000_000
 	precision   = 1000
 )
 
@@ -77,20 +77,20 @@ func main() {
 		Dex: map[string]Platform{
 			"stonfi": {
 				Name:     "stonfi",
-				Reserve0: 101309841383,
-				Reserve1: 3291991291818279,
+				Reserve0: 101935334773,
+				Reserve1: 3273580141059169,
 				Fee:      30,
 			},
 			"dedust": {
 				Name:     "dedust",
-				Reserve0: 101857946829,
-				Reserve1: 3209316900402729,
+				Reserve0: 100890720033,
+				Reserve1: 3241290194034248,
 				Fee:      25,
 			},
 			"private": {
 				Name:     "private",
-				Reserve0: 101155553251,
-				Reserve1: 3295767622763068,
+				Reserve0: 101946149862,
+				Reserve1: 3273338639122545,
 				Fee:      30,
 			},
 		},
