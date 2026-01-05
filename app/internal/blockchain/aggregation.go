@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"strconv"
+	"strings"
 	"time"
 
 	"context"
@@ -48,11 +49,12 @@ func (a *Aggregation) Run(ctx context.Context) {
 		for k, v := range contracts {
 			aggr, err := a.getAccountData(ctx, k, v)
 			if err != nil {
-				a.log.Errorln(err)
-				return
+				a.log.Errorf("Failed to get account data for contract %s: %v", k, err)
+				continue
 			}
 			if aggr == nil {
-				return
+				a.log.Warnf("Contract %s: received nil account data, skipping", k)
+				continue
 			}
 			aggrs[k] = *aggr
 		}
@@ -94,8 +96,32 @@ func (a *Aggregation) getAccountData(
 
 	addr := address.MustParseAddr(contractAddress)
 
-	res, err := api.WaitForBlock(b.SeqNo).GetAccount(ctx, b, addr)
-	if err != nil {
+	const maxRetries = 3
+	const retryDelay = 2 * time.Second
+	var res *tlb.Account
+
+	for attempt := 1; attempt <= maxRetries; attempt++ {
+		res, err = api.WaitForBlock(b.SeqNo).GetAccount(ctx, b, addr)
+		if err == nil {
+			break
+		}
+
+		// Проверяем, является ли это ошибкой баланса
+		if strings.Contains(err.Error(), "proof balance not match state balance") {
+			if attempt < maxRetries {
+				a.log.Warnf("Contract %s: proof balance mismatch (attempt %d/%d), retrying in %v...", 
+					contractName, attempt, maxRetries, retryDelay)
+				time.Sleep(retryDelay)
+				// Получаем новый блок перед следующей попыткой
+				b, err = api.CurrentMasterchainInfo(ctx)
+				if err != nil {
+					return nil, fmt.Errorf("failed to get new masterchain info on retry: %w", err)
+				}
+				continue
+			}
+			a.log.Errorf("Contract %s: proof balance mismatch after %d attempts", contractName, maxRetries)
+		}
+		// Для других ошибок или после исчерпания попыток возвращаем ошибку
 		return nil, err
 	}
 
